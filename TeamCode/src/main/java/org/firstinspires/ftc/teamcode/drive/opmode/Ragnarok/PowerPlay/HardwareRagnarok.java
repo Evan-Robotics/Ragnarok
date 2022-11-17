@@ -62,9 +62,9 @@ public class HardwareRagnarok {
 
         // Define and Initialize Motors
         leftTower = ahwMap.get(DcMotor.class, "LEFT TOWER");
-        leftTower.setDirection(DcMotor.Direction.FORWARD);
+        leftTower.setDirection(DcMotor.Direction.REVERSE);
         rightTower = ahwMap.get(DcMotor.class, "RIGHT TOWER");
-        rightTower.setDirection(DcMotor.Direction.REVERSE);
+        rightTower.setDirection(DcMotor.Direction.FORWARD);
 
         // Set all motors to zero power
         leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -74,8 +74,8 @@ public class HardwareRagnarok {
 
 
         // May want to use RUN_USING_ENCODERS if encoders are installed.
-        leftTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftTower.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightTower.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
         leftTwist = ahwMap.get(Servo.class, "LEFT TWIST");
