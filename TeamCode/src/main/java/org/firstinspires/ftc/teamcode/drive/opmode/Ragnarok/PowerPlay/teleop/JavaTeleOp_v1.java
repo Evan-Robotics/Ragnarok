@@ -17,8 +17,6 @@ import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.HardwareRa
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PoseStorage;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
-import java.util.Vector;
-
 @TeleOp(name = "[MAIN] Java TeleOp", group = "Ragnarok")
 public class JavaTeleOp_v1 extends LinearOpMode {
 
@@ -40,16 +38,13 @@ public class JavaTeleOp_v1 extends LinearOpMode {
 
     int towerHeight = 0;
 
-    int targetTowerPosition;
-
-    boolean twistPos = false;
-    boolean gp2_a_last_frame = false;
-
-    boolean wristPos = false;
-    boolean gp2_y_last_frame = false;
+    // int targetTowerPosition;
 
     boolean clawPos = false;
     boolean gp2_b_last_frame = false;
+
+    boolean flipState = false;
+    boolean gp2_x_last_frame = false;
 
     private Mode currentMode = Mode.NORMAL_CONTROL;
     private PIDFController headingController = new PIDFController(SampleMecanumDrive.HEADING_PID);
@@ -73,7 +68,6 @@ public class JavaTeleOp_v1 extends LinearOpMode {
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
-
 
         drive.getLocalizer().setPoseEstimate(PoseStorage.currentPose);
         headingController.setInputBounds(-Math.PI, Math.PI);
@@ -116,7 +110,7 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             if (gamepad2.left_bumper) {
                 speedChange2 = 0.5;
             } else if (gamepad1.right_bumper) {
-                speedChange2 = 1;
+                speedChange2 = 1.5;
             } else {
                 speedChange2 = 0.7;
             }
@@ -210,32 +204,28 @@ public class JavaTeleOp_v1 extends LinearOpMode {
 
 
             double towerSpeed;
-            towerSpeed = gamepad2.right_stick_y * speedChange2;
+            towerSpeed = gamepad2.left_stick_y * speedChange2;
             robot.leftTower.setPower(towerSpeed);
             robot.rightTower.setPower(towerSpeed);
 
 
-            if (gamepad2.a && !gp2_a_last_frame) {
-                twistPos = !twistPos;
-            }
-            gp2_a_last_frame = gamepad2.a;
-
-            robot.leftTwist.setPosition(twistPos ? 0.3 : 0.95);
-            robot.rightTwist.setPosition(twistPos ? 0.3 : 0.95);
-
-            if (gamepad2.y && !gp2_y_last_frame) {
-                wristPos = !wristPos;
-            }
-            gp2_y_last_frame = gamepad2.y;
-
-            robot.wrist.setPosition(wristPos ? 0 : 1);
-
-            if (gamepad2.b && !gp2_b_last_frame) {
+            if (gamepad2.a && !gp2_b_last_frame) {
                 clawPos = !clawPos;
             }
-            gp2_b_last_frame = gamepad2.b;
+            gp2_b_last_frame = gamepad2.a;
 
-            robot.claw.setPosition(clawPos ? 0.05 : .5);
+
+            if (gamepad2.x && !gp2_x_last_frame) {
+                flipState = !flipState;
+            }
+            gp2_x_last_frame = gamepad2.x;
+
+            robot.leftTwist.setPosition(flipState ? 0.3 : 0.95);
+            robot.rightTwist.setPosition(flipState ? 0.3 : 0.95);
+
+            robot.wrist.setPosition(flipState ? (15./360.) : (1 - 100./360.));
+
+            robot.claw.setPosition(clawPos ? 0.05 : .5); // TODO: mess with open bounds
 
             if (gamepad1.start && gamepad1.dpad_up) {
                 drive.getLocalizer().setPoseEstimate(new Pose2d(-63, 60, Math.PI/2));
@@ -249,7 +239,7 @@ public class JavaTeleOp_v1 extends LinearOpMode {
 
                     ly = -gamepad1.left_stick_y;
                     lx = -gamepad1.left_stick_x;
-                    rx =  gamepad1.right_stick_x;
+                    rx = -gamepad1.right_stick_x;
 
                     //Normal Robot Control
                     driveDirection = new Pose2d(

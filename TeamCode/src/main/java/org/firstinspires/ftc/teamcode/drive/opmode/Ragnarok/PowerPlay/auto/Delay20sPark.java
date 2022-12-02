@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.auto;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous
@@ -13,6 +14,8 @@ public class Delay20sPark extends LinearOpMode {
     private DcMotor front_right;
     private DcMotor back_left;
     private DcMotor back_right;
+
+    private Servo claw;
 
 
     /* Declare OpMode members. */
@@ -38,6 +41,8 @@ public class Delay20sPark extends LinearOpMode {
         front_right = hardwareMap.get(DcMotor.class, "FRONT RIGHT");
         back_left = hardwareMap.get(DcMotor.class, "BACK LEFT");
         back_right = hardwareMap.get(DcMotor.class, "BACK RIGHT");
+
+        claw = hardwareMap.get(Servo.class, "CLAW");
 
 
         front_left.setDirection(DcMotor.Direction.FORWARD);
@@ -65,8 +70,13 @@ public class Delay20sPark extends LinearOpMode {
         back_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
+        claw.setPosition(0.05);
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
+
+        claw.setPosition(0.5);
+
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
