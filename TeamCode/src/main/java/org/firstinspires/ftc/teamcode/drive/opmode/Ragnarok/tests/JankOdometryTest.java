@@ -18,7 +18,7 @@ public class JankOdometryTest extends LinearOpMode {
         right(24., 0.3);
     }
 
-    double INCH_TO_TICKS = 177962./96.;
+    double INCH_TO_TICKS = 1876.7176781002;
 
     private DcMotor front_left;
     private DcMotor front_right;
@@ -66,11 +66,6 @@ public class JankOdometryTest extends LinearOpMode {
         back_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         mainTrajectory();
-
-        front_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        front_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        back_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        back_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         while (opModeIsActive()) {
             telemetry.addData("Straight Distance", straightEncoder.getCurrentPosition());

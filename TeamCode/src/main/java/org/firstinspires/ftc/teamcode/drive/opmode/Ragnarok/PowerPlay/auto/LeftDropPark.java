@@ -35,8 +35,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous(name="--MAIN-- Camera Park")
-public class MessyCameraParkAuto extends LinearOpMode
+@Autonomous(name="--WIP-- Left Side Auto")
+public class LeftDropPark extends LinearOpMode
 {
     //INTRODUCE VARIABLES HERE
 
@@ -66,6 +66,7 @@ public class MessyCameraParkAuto extends LinearOpMode
 
     // Tag ID 1,2,3 from the 36h11 family
     /*EDIT IF NEEDED!!!*/
+
     int LEFT = 1;
     int MIDDLE = 2;
     int RIGHT = 3;
@@ -200,17 +201,17 @@ public class MessyCameraParkAuto extends LinearOpMode
         sleep(500);
 
         switch (tagOfInterest.id) {
-            case 1: // left
+            case 1:
                 telemetry.addLine("Running park1");
                 telemetry.update();
                 park1();
                 break;
-            case 2: // middle
+            case 2:
                 telemetry.addLine("Running park2");
                 telemetry.update();
                 park2();
                 break;
-            case 3: // right
+            case 3:
                 telemetry.addLine("Running park2");
                 telemetry.update();
                 park3();
@@ -236,6 +237,8 @@ public class MessyCameraParkAuto extends LinearOpMode
         back_right.setPower(br_speed);
     }
 
+    // TODO: add preload drop
+
     private void park1() {
         timeMove(-0.2, -0.2, -0.2, -0.2);
         sleep(500);
@@ -247,12 +250,33 @@ public class MessyCameraParkAuto extends LinearOpMode
         timeMove(0,0,0,0);
         sleep(500);
 
+        claw.setPosition(0);
+        sleep(500);
+
         timeMove(-0.5, -0.5, -0.5, -0.5);
         sleep(1200);
         timeMove(0, 0, 0, 0);
         sleep(500);
     }
     private void park2() {
+        timeMove(-0.2, -0.2, -0.2, -0.2);
+        sleep(500);
+        timeMove(0,0,0,0);
+        sleep(500);
+
+        timeMove(0.5,-0.5,-0.5,0.5);
+        sleep(1600);
+        timeMove(0,0,0,0);
+        sleep(500);
+
+        claw.setPosition(0);
+        sleep(500);
+
+        timeMove(-0.5,0.5,0.5,-0.5);
+        sleep(1600);
+        timeMove(0,0,0,0);
+        sleep(500);
+
         timeMove(-0.5, -0.5, -0.5, -0.5);
         sleep(1600);
         timeMove(0, 0, 0, 0);
@@ -264,8 +288,16 @@ public class MessyCameraParkAuto extends LinearOpMode
         timeMove(0,0,0,0);
         sleep(500);
 
+        timeMove(0.5,-0.5,-0.5,0.5);
+        sleep(3500);
+        timeMove(0,0,0,0);
+        sleep(500);
+
+        claw.setPosition(0);
+        sleep(500);
+
         timeMove(-0.5,0.5,0.5,-0.5);
-        sleep(1600);
+        sleep(3500);
         timeMove(0,0,0,0);
         sleep(500);
 

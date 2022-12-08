@@ -24,10 +24,12 @@ package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.auto;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.AprilTagDetectionPipeline;
+import org.firstinspires.ftc.teamcode.util.Encoder;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -35,8 +37,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous(name="--MAIN-- Camera Park")
-public class MessyCameraParkAuto extends LinearOpMode
+@Autonomous(name="--WIP LEFT-- Drop and Park")
+public class LeftDrop extends LinearOpMode
 {
     //INTRODUCE VARIABLES HERE
 
@@ -45,7 +47,13 @@ public class MessyCameraParkAuto extends LinearOpMode
     private DcMotor back_left;
     private DcMotor back_right;
 
+    private Encoder straightEncoder;
+    private Encoder strafeEncoder;
+
     private Servo claw;
+
+    double STRAIGHT_INCH_TO_TICKS = 1876.7176781002;
+    double STRAFE_INCH_TO_TICKS = 175735. / 94.75;
 
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -66,6 +74,7 @@ public class MessyCameraParkAuto extends LinearOpMode
 
     // Tag ID 1,2,3 from the 36h11 family
     /*EDIT IF NEEDED!!!*/
+
     int LEFT = 1;
     int MIDDLE = 2;
     int RIGHT = 3;
@@ -80,6 +89,9 @@ public class MessyCameraParkAuto extends LinearOpMode
         back_left = hardwareMap.get(DcMotor.class, "BACK LEFT");
         back_right = hardwareMap.get(DcMotor.class, "BACK RIGHT");
 
+        straightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "FRONT RIGHT"));
+        strafeEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "BACK LEFT"));
+
         claw = hardwareMap.get(Servo.class, "CLAW");
 
         claw.setPosition(0.05);
@@ -89,10 +101,18 @@ public class MessyCameraParkAuto extends LinearOpMode
         back_left.setDirection(DcMotor.Direction.FORWARD);
         back_right.setDirection(DcMotor.Direction.REVERSE);
 
+        straightEncoder.setDirection(Encoder.Direction.FORWARD);
+        strafeEncoder.setDirection(Encoder.Direction.FORWARD);
+
         front_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         front_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         back_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         back_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        front_left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        front_right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        back_left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        back_right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -179,10 +199,6 @@ public class MessyCameraParkAuto extends LinearOpMode
             sleep(20);
         }
 
-
-
-
-
         if(tagOfInterest != null)
         {
             telemetry.addLine("Tag snapshot:\n");
@@ -196,21 +212,27 @@ public class MessyCameraParkAuto extends LinearOpMode
         }
 
         //PUT AUTON CODE HERE (DRIVER PRESSED THE PLAY BUTTON!)
+
+        front_left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        front_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        back_left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        back_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         claw.setPosition(0.5);
         sleep(500);
 
         switch (tagOfInterest.id) {
-            case 1: // left
+            case 1:
                 telemetry.addLine("Running park1");
                 telemetry.update();
                 park1();
                 break;
-            case 2: // middle
+            case 2:
                 telemetry.addLine("Running park2");
                 telemetry.update();
                 park2();
                 break;
-            case 3: // right
+            case 3:
                 telemetry.addLine("Running park2");
                 telemetry.update();
                 park3();
@@ -229,49 +251,119 @@ public class MessyCameraParkAuto extends LinearOpMode
         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
     }
 
-    private void timeMove(double fl_speed, double fr_speed, double bl_speed, double br_speed) {
-        front_left.setPower(fl_speed);
-        front_right.setPower(fr_speed);
-        back_left.setPower(bl_speed);
-        back_right.setPower(br_speed);
+    private void forward(double in, double power) {
+        int startingPos = straightEncoder.getCurrentPosition();
+        int targetPos = (int) (in * STRAIGHT_INCH_TO_TICKS) + startingPos;
+        while (straightEncoder.getCurrentPosition() < targetPos && !isStopRequested()) {
+            front_left.setPower(power);
+            front_right.setPower(power);
+            back_left.setPower(power);
+            back_right.setPower(power);
+            telemetry.addData("Target Pos", targetPos);
+            telemetry.addData("Current Pos", straightEncoder.getCurrentPosition());
+            telemetry.update();
+            sleep(1);
+        }
+        front_left.setPower(0);
+        front_right.setPower(0);
+        back_left.setPower(0);
+        back_right.setPower(0);
+    }
+
+    private void back(double in, double power) {
+        int startingPos = straightEncoder.getCurrentPosition();
+        int targetPos = (int) (in * STRAIGHT_INCH_TO_TICKS) + startingPos;
+        while (straightEncoder.getCurrentPosition() > targetPos && !isStopRequested()) {
+            front_left.setPower(-power);
+            front_right.setPower(-power);
+            back_left.setPower(-power);
+            back_right.setPower(-power);
+            telemetry.addData("Target Pos", targetPos);
+            telemetry.addData("Current Pos", straightEncoder.getCurrentPosition());
+            telemetry.update();
+            sleep(1);
+        }
+        front_left.setPower(0);
+        front_right.setPower(0);
+        back_left.setPower(0);
+        back_right.setPower(0);
+    }
+
+    private void right(double in, double power) {
+        int startingPos = strafeEncoder.getCurrentPosition();
+        int targetPos = (int) (in * STRAFE_INCH_TO_TICKS) + startingPos;
+        while (strafeEncoder.getCurrentPosition() < targetPos && !isStopRequested()) {
+            front_left.setPower(power);
+            front_right.setPower(-power);
+            back_left.setPower(-power);
+            back_right.setPower(power);
+            telemetry.addData("Target Pos", targetPos);
+            telemetry.addData("Current Pos", strafeEncoder.getCurrentPosition());
+            telemetry.update();
+            sleep(1);
+        }
+        front_left.setPower(0);
+        front_right.setPower(0);
+        back_left.setPower(0);
+        back_right.setPower(0);
+    }
+
+    private void left(double in, double power) {
+        int startingPos = strafeEncoder.getCurrentPosition();
+        int targetPos = (int) (in * STRAFE_INCH_TO_TICKS) + startingPos;
+        while (strafeEncoder.getCurrentPosition() > targetPos && !isStopRequested()) {
+            front_left.setPower(-power);
+            front_right.setPower(power);
+            back_left.setPower(power);
+            back_right.setPower(-power);
+            telemetry.addData("Target Pos", targetPos);
+            telemetry.addData("Current Pos", strafeEncoder.getCurrentPosition());
+            telemetry.update();
+            sleep(1);
+        }
+        front_left.setPower(0);
+        front_right.setPower(0);
+        back_left.setPower(0);
+        back_right.setPower(0);
     }
 
     private void park1() {
-        timeMove(-0.2, -0.2, -0.2, -0.2);
-        sleep(500);
-        timeMove(0,0,0,0);
-        sleep(500);
+        back(2, 0.2);
+        sleep(1000);
 
-        timeMove(0.5,-0.5,-0.5,0.5);
-        sleep(1600);
-        timeMove(0,0,0,0);
-        sleep(500);
+        right(24, 0.4);
+        sleep(100);
+        claw.setPosition(0);
+        sleep(1000);
 
-        timeMove(-0.5, -0.5, -0.5, -0.5);
-        sleep(1200);
-        timeMove(0, 0, 0, 0);
-        sleep(500);
+        back(24. * 1.5, 0.5);
     }
     private void park2() {
-        timeMove(-0.5, -0.5, -0.5, -0.5);
-        sleep(1600);
-        timeMove(0, 0, 0, 0);
-        sleep(500);
+        back(2, 0.2);
+        sleep(1000);
+
+        right(24, 0.4);
+        sleep(100);
+        claw.setPosition(0);
+        sleep(1000);
+
+        back(24, 0.3);
+        sleep(1000);
+
+        left(24, 0.4);
     }
     private void park3() {
-        timeMove(-0.2, -0.2, -0.2, -0.2);
-        sleep(500);
-        timeMove(0,0,0,0);
-        sleep(500);
+        back(2, 0.2);
+        sleep(1000);
 
-        timeMove(-0.5,0.5,0.5,-0.5);
-        sleep(1600);
-        timeMove(0,0,0,0);
-        sleep(500);
+        right(24, 0.4);
+        sleep(100);
+        claw.setPosition(0);
+        sleep(1000);
 
-        timeMove(-0.5, -0.5, -0.5, -0.5);
-        sleep(1200);
-        timeMove(0, 0, 0, 0);
-        sleep(500);
+        back(24, 0.3);
+        sleep(1000);
+
+        left(24 * 2, 0.4);
     }
 }

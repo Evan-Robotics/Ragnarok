@@ -223,9 +223,13 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             robot.leftTwist.setPosition(flipState ? 0.3 : 0.95);
             robot.rightTwist.setPosition(flipState ? 0.3 : 0.95);
 
-            robot.wrist.setPosition(flipState ? (15./360.) : (1 - 100./360.));
+            if (gamepad2.b) {
+                robot.wrist.setPosition(1 - 100./360.);
+            } else {
+                robot.wrist.setPosition(flipState ? (15./360.) : (1 - 100./360.));
+            }
 
-            robot.claw.setPosition(clawPos ? 0.05 : .5); // TODO: mess with open bounds
+            robot.claw.setPosition(clawPos ? 0.05 : 0.5);
 
             if (gamepad1.start && gamepad1.dpad_up) {
                 drive.getLocalizer().setPoseEstimate(new Pose2d(-63, 60, Math.PI/2));

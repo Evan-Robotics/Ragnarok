@@ -80,15 +80,19 @@ public class HardwareRagnarok {
         // Define and initialize ALL installed servos.
         leftTwist = ahwMap.get(Servo.class, "LEFT TWIST");
         leftTwist.setDirection(Servo.Direction.FORWARD);
+        leftTwist.setPosition(0.95);
 
         rightTwist = ahwMap.get(Servo.class, "RIGHT TWIST");
         rightTwist.setDirection(Servo.Direction.REVERSE);
+        rightTwist.setPosition(0.95);
 
         wrist = ahwMap.get(Servo.class, "WRIST");
         wrist.setDirection(Servo.Direction.FORWARD);
+        wrist.setPosition(1 - 100./360.);
 
         claw = ahwMap.get(Servo.class, "CLAW");
         claw.setDirection(Servo.Direction.FORWARD);
+        claw.setPosition(0.5);
 
     }
 }
