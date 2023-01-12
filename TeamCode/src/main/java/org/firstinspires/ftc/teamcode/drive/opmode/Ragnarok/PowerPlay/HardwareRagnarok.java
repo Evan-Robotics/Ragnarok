@@ -29,23 +29,32 @@
 
 package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay;
 
-import com.qualcomm.robotcore.hardware.CRServo;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-
+@Config
 public class HardwareRagnarok {
     /* Public OpMode members. */
     public DcMotor leftTower = null;
     public DcMotor rightTower = null;
 
     public Servo leftTwist = null;
-    public Servo rightTwist = null;
+    public Servo rightTwist= null;
+
+    public static double TWIST_POS_1 = .895;
+    public static double TWIST_POS_2 = .23;
+
     public Servo wrist = null;
+    public static double WRIST_POS_1 = .722;
+    public static double WRIST_POS_2 = 0.04;
+
     public Servo claw = null;
+    public static double CLAW_POS_1 = 0.09;
+    public static double CLAW_POS_2 = .5;
+
 
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
@@ -80,19 +89,36 @@ public class HardwareRagnarok {
         // Define and initialize ALL installed servos.
         leftTwist = ahwMap.get(Servo.class, "LEFT TWIST");
         leftTwist.setDirection(Servo.Direction.FORWARD);
-        leftTwist.setPosition(0.95);
+        leftTwist.setPosition(TWIST_POS_1);
 
         rightTwist = ahwMap.get(Servo.class, "RIGHT TWIST");
         rightTwist.setDirection(Servo.Direction.REVERSE);
-        rightTwist.setPosition(0.95);
+        rightTwist.setPosition(TWIST_POS_1);
 
         wrist = ahwMap.get(Servo.class, "WRIST");
         wrist.setDirection(Servo.Direction.FORWARD);
-        wrist.setPosition(1 - 100./360.);
+        wrist.setPosition(WRIST_POS_1);
 
         claw = ahwMap.get(Servo.class, "CLAW");
         claw.setDirection(Servo.Direction.FORWARD);
-        claw.setPosition(0.5);
+        claw.setPosition(CLAW_POS_1);
 
+    }
+    public void moveTowers(double speed) {
+        leftTower.setPower(-speed);
+        rightTower.setPower(-speed);
+    }
+
+    public void moveTwists(boolean pos) {
+        leftTwist.setPosition(pos ? TWIST_POS_2 : TWIST_POS_1);
+        rightTwist.setPosition(pos ? TWIST_POS_2 : TWIST_POS_1);
+    }
+
+    public void moveWrist(boolean pos) {
+        wrist.setPosition(pos ? WRIST_POS_2 : WRIST_POS_1);
+    }
+
+    public void moveClaw(boolean pos) {
+        claw.setPosition(pos ? CLAW_POS_2 : CLAW_POS_1);
     }
 }
