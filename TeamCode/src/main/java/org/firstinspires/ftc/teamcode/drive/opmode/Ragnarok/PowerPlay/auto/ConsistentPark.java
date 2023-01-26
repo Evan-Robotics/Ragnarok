@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.auto;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -23,12 +22,8 @@ import java.util.ArrayList;
 /*
  * This is an example of a more complex path to really test the tuning.
  */
-
-@Config
-@Autonomous(name="--MAIN-- Left Auto")
-public class AutoLeft extends LinearOpMode {
-
-    public static int TIME_UP = 500;
+@Autonomous(name="--backup-- Just Park")
+public class ConsistentPark extends LinearOpMode {
 
 
     OpenCvCamera camera;
@@ -174,83 +169,31 @@ public class AutoLeft extends LinearOpMode {
         drive.followTrajectory(traj0);
 
         Trajectory traj1 = drive.trajectoryBuilder(traj0.end())
-                .back(50)
+                .back(44)
                 .build();
         drive.followTrajectory(traj1);
 
         sleep(100);
 
-        Trajectory traj2 = drive.trajectoryBuilder(traj1.end())
-                .forward(7)
+                Trajectory traj2_1 = drive.trajectoryBuilder(traj1.end())
+                .strafeRight(26)
                 .build();
-        drive.followTrajectory(traj2);
-
-        TrajectorySequence traj3 = drive.trajectorySequenceBuilder(traj2.end())
-                .turn(Math.toRadians(-45))
-                .build();
-        drive.followTrajectorySequence(traj3);
-
-        robot.moveTwists(true);
-
-
-        Trajectory traj4 = drive.trajectoryBuilder(traj3.end())
-                .strafeTo(new Vector2d(-27, -6),
-                        SampleMecanumDrive.getVelocityConstraint(12, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .build();
-        drive.followTrajectory(traj4);
-
-
-        robot.moveTowers(0.4);
-
-
-        sleep(TIME_UP);
-
-        robot.moveTowers(-0.5);
-
-        sleep(TIME_UP/2);
-
-        robot.moveClaw(false);
-
-        robot.moveTowers(0);
-
-        sleep(1000);
-
-        Trajectory traj5 = drive.trajectoryBuilder(traj4.end())
-                .forward(14)
-                .build();
-        drive.followTrajectory(traj5);
-
-        robot.moveClaw(true);
-        robot.moveWrist(false);
-        robot.moveTwists(false);
-        robot.moveTowers(-1);
-        sleep(500);
-
-        TrajectorySequence traj6 = drive.trajectorySequenceBuilder(traj5.end())
-                .turn(Math.toRadians(45))
-                .build();
-        drive.followTrajectorySequence(traj6);
-
-        Trajectory traj7_1 = drive.trajectoryBuilder(traj6.end())
-                .strafeRight(30)
-                .build();
-        Trajectory traj7_2 = drive.trajectoryBuilder(traj6.end())
+        Trajectory traj2_2 = drive.trajectoryBuilder(traj1.end())
                 .strafeRight(2)
                 .build();
-        Trajectory traj7_3 = drive.trajectoryBuilder(traj6.end())
+        Trajectory traj2_3 = drive.trajectoryBuilder(traj1.end())
                 .strafeLeft(26)
                 .build();
 
         switch (tagOfInterest.id) {
             case 1:
-                drive.followTrajectory(traj7_1);
+                drive.followTrajectory(traj2_1);
                 break;
             case 2:
-                drive.followTrajectory(traj7_2);
+                drive.followTrajectory(traj2_2);
                 break;
             case 3:
-                drive.followTrajectory(traj7_3);
+                drive.followTrajectory(traj2_3);
                 break;
         }
 

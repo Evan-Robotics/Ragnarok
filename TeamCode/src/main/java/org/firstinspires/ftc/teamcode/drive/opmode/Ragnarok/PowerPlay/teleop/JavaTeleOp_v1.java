@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.HardwareRa
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PoseStorage;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
-@TeleOp(name = "[MAIN] Java TeleOp", group = "Ragnarok")
+@TeleOp(name = "--MAIN-- Java TeleOp", group = "Ragnarok")
 public class JavaTeleOp_v1 extends LinearOpMode {
 
     // Driving variables
@@ -242,9 +242,9 @@ public class JavaTeleOp_v1 extends LinearOpMode {
 
                     //Normal Robot Control
                     driveDirection = new Pose2d(
-                            Math.abs(ly) * ly * speedChange1,
-                            Math.abs(lx) * lx * speedChange1,
-                            Math.abs(rx) * rx * speedChange1
+                            ly * ly * ly * speedChange1,
+                            lx * lx * lx * speedChange1,
+                            rx * rx * rx * speedChange1
                     );
 
                     // Switch to tank if gamepad1 left dpad is activated

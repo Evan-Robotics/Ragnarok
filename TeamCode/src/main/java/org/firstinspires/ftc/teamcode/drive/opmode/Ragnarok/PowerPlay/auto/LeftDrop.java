@@ -22,6 +22,7 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -37,6 +38,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
+@Disabled
 @Autonomous(name="--WIP LEFT-- Drop and Park")
 public class LeftDrop extends LinearOpMode
 {

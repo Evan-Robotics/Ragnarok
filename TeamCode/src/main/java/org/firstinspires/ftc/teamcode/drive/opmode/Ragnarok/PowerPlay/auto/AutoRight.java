@@ -1,13 +1,17 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.auto;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.HardwareRagnarok;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -15,11 +19,10 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-/*
- * This is an example of a more complex path to really test the tuning.
- */
+
 @Autonomous(name="--MAIN-- Right Auto")
 public class AutoRight extends LinearOpMode {
+
 
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -44,6 +47,7 @@ public class AutoRight extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        drive.setPoseEstimate(new Pose2d(39.875, -62.5, Math.toRadians(-90)));
 
         HardwareRagnarok robot = new HardwareRagnarok();
         robot.init(hardwareMap);
@@ -150,39 +154,50 @@ public class AutoRight extends LinearOpMode {
         robot.moveTwists(false);
 
         if (isStopRequested()) return;
+        sleep(100);
 //
 //        Trajectory beginning_to_junct_1 = drive.trajectoryBuilder(new Pose2d(35, -62.5, Math.toRadians(-90)), true)
 //                .back(75.5)
 //                .build();
 //
 //        drive.followTrajectory(beginning_to_junct_1);
+        Trajectory traj0 = drive.trajectoryBuilder(drive.getPoseEstimate())
+                .strafeTo(new Vector2d(35.5, -58.25))
+                .build();
+        drive.followTrajectory(traj0);
 
-        drive.followTrajectory(drive.trajectoryBuilder(new Pose2d(35, -62.5, Math.toRadians(-90)))
-                .back(45)
-                .build());
+        Trajectory traj1 = drive.trajectoryBuilder(traj0.end())
+                .back(50)
+                .build();
+        drive.followTrajectory(traj1);
 
         sleep(100);
 
-        drive.followTrajectory(drive.trajectoryBuilder(new Pose2d(35, -62.5, Math.toRadians(-90)))
+        Trajectory traj2 = drive.trajectoryBuilder(traj1.end())
                 .forward(7)
-                .build());
+                .build();
+        drive.followTrajectory(traj2);
 
-        drive.followTrajectorySequence(drive.trajectorySequenceBuilder(new Pose2d(35, -62.5, Math.toRadians(-90)))
+        TrajectorySequence traj3 = drive.trajectorySequenceBuilder(traj2.end())
                 .turn(Math.toRadians(45))
-                .build());
+                .build();
+        drive.followTrajectorySequence(traj3);
 
-        robot.moveTowers(1);
         robot.moveTwists(true);
 
-        sleep(700);
 
-        robot.moveTowers(0.3);
+        Trajectory traj4 = drive.trajectoryBuilder(traj3.end())
+                .strafeTo(new Vector2d(-28, -6),
+                        SampleMecanumDrive.getVelocityConstraint(12, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .build();
+        drive.followTrajectory(traj4);
 
-        drive.followTrajectory(drive.trajectoryBuilder(new Pose2d(35, -62.5, Math.toRadians(-90)))
-                .back(10)
-                .build());
 
-        sleep(200);
+        robot.moveTowers(0.4);
+
+
+        sleep(2000);
 
         robot.moveTowers(-0.5);
 
@@ -190,13 +205,12 @@ public class AutoRight extends LinearOpMode {
 
         robot.moveClaw(false);
 
-        robot.moveTowers(0.5);
-
         sleep(1000);
 
-        drive.followTrajectory(drive.trajectoryBuilder(new Pose2d(35, -62.5, Math.toRadians(-90)))
-                .forward(7)
-                .build());
+        Trajectory traj5 = drive.trajectoryBuilder(traj4.end())
+                .forward(14)
+                .build();
+        drive.followTrajectory(traj5);
 
         robot.moveClaw(true);
         robot.moveWrist(false);
@@ -204,24 +218,34 @@ public class AutoRight extends LinearOpMode {
         robot.moveTowers(-1);
         sleep(500);
 
-        drive.followTrajectorySequence(drive.trajectorySequenceBuilder(new Pose2d(35, -62.5, Math.toRadians(-90)))
-                .turn(Math.toRadians(-50))
-                .build());
+        TrajectorySequence traj6 = drive.trajectorySequenceBuilder(traj5.end())
+                .turn(Math.toRadians(-45))
+                .build();
+        drive.followTrajectorySequence(traj6);
+
+        Trajectory traj7_1 = drive.trajectoryBuilder(traj6.end())
+                .strafeRight(30)
+                .build();
+        Trajectory traj7_2 = drive.trajectoryBuilder(traj6.end())
+                .strafeRight(2)
+                .build();
+        Trajectory traj7_3 = drive.trajectoryBuilder(traj6.end())
+                .strafeLeft(26)
+                .build();
 
         switch (tagOfInterest.id) {
             case 1:
-                drive.followTrajectory(drive.trajectoryBuilder(new Pose2d(35, -62.5, Math.toRadians(-90)))
-                        .strafeRight(30)
-                        .build());
+                drive.followTrajectory(traj7_1);
                 break;
             case 2:
+                drive.followTrajectory(traj7_2);
                 break;
             case 3:
-                drive.followTrajectory(drive.trajectoryBuilder(new Pose2d(35, -62.5, Math.toRadians(-90)))
-                        .strafeLeft(36)
-                        .build());
+                drive.followTrajectory(traj7_3);
                 break;
         }
+
+        robot.moveTowers(0);
 
         sleep(2000);
 
@@ -229,6 +253,7 @@ public class AutoRight extends LinearOpMode {
 
     void tagToTelemetry(AprilTagDetection detection)
     {
+        telemetry.addData("Detected tag ID", detection.id);
         telemetry.addLine(String.format("\nDetected tag ID=%d", detection.id));
         telemetry.addLine(String.format("Translation X: %.2f feet", detection.pose.x*FEET_PER_METER));
         telemetry.addLine(String.format("Translation Y: %.2f feet", detection.pose.y*FEET_PER_METER));
