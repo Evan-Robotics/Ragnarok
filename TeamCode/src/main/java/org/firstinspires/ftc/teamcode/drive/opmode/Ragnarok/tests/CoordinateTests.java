@@ -10,6 +10,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.HardwareRagnarok;
@@ -30,6 +31,12 @@ public class CoordinateTests extends LinearOpMode {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         HardwareRagnarok robot   = new HardwareRagnarok();
         robot.init(hardwareMap);
+
+        robot.leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        robot.rightTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        robot.leftTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         Pose2d startPose = new Pose2d(x, y, Math.toRadians(head));
 
@@ -55,6 +62,7 @@ public class CoordinateTests extends LinearOpMode {
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
+            telemetry.addData("Tower Height", robot.leftTower.getCurrentPosition());
             telemetry.update();
             sleep(100);
         }

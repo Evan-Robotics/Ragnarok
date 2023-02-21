@@ -1,11 +1,14 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.auto;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
@@ -20,13 +23,22 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
+/*
+ * This is an example of a more complex path to really test the tuning.
+ */
 
-@Autonomous(name="--MAIN-- Right Auto")
-public class AutoRight extends LinearOpMode {
-
-
+@Config
+@Autonomous(name="--WIP-- Left")
+public class AutoLeftV2 extends LinearOpMode {
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
+
+    public static Pose2d START_POSITION = new Pose2d(-39.875, -62.5, -Math.PI/2);
+    public static int DROP_HEIGHT = 2500;
+    public static int FIRST_PICKUP = 150;
+    public static int CONE_REDUCE_CONSTANT = 20;
+    int highestConePos = FIRST_PICKUP;
+
 
     static final double FEET_PER_METER = 3.28084;
 
@@ -48,13 +60,12 @@ public class AutoRight extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        drive.setPoseEstimate(new Pose2d(39.875, -62.5, Math.toRadians(-90)));
+        drive.setPoseEstimate(START_POSITION);
 
         HardwareRagnarok robot = new HardwareRagnarok();
         robot.init(hardwareMap);
 
-        robot.leftTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.rightTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.towersPositionMode();
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -156,104 +167,101 @@ public class AutoRight extends LinearOpMode {
         robot.moveClaw(true);
         robot.moveWrist(false);
         robot.moveTwists(false);
+        robot.moveGuide(false);
 
         if (isStopRequested()) return;
-        sleep(100);
-//
-//        Trajectory beginning_to_junct_1 = drive.trajectoryBuilder(new Pose2d(35, -62.5, Math.toRadians(-90)), true)
-//                .back(75.5)
-//                .build();
-//
-//        drive.followTrajectory(beginning_to_junct_1);
-        Trajectory traj0 = drive.trajectoryBuilder(drive.getPoseEstimate())
-                .strafeTo(new Vector2d(35.5, -58.25))
+
+        Pose2d prepMovementPose = new Pose2d(-36, -58.25, -Math.PI/2);
+        Pose2d overshootPose = new Pose2d(-36, -8, -Math.PI/2);
+        Pose2d prepScorePose = new Pose2d(-36, -12, -Math.PI*3/4);
+        Pose2d scorePose = new Pose2d(-28, -4, -Math.PI*3/4);
+        Pose2d prepLoadPose = new Pose2d(-36, -12, -Math.PI);
+        Pose2d loadPose = new Pose2d(-60, -12, -Math.PI);
+
+        TrajectorySequence startToPrepScoreTrajSeq = drive.trajectorySequenceBuilder(START_POSITION)
+                .splineToConstantHeading(getVec(prepMovementPose), Math.PI/2)
+                .splineToConstantHeading(getVec(overshootPose), Math.PI/2)
+                .waitSeconds(0.1)
+                .splineToLinearHeading(prepScorePose, -Math.PI/2)
                 .build();
-        drive.followTrajectory(traj0);
 
-        Trajectory traj1 = drive.trajectoryBuilder(traj0.end())
-                .back(50)
+        TrajectorySequence scorePreLoadConeTrajSeq = drive.trajectorySequenceBuilder(prepScorePose)
+                .strafeTo(getVec(scorePose))
+                .addTemporalMarker(()->{
+                    robot.setTowerTarget(DROP_HEIGHT);
+                    robot.moveTowers(1);
+                    robot.moveTwists(true);
+                    robot.moveGuide(true);
+                })
+                .waitSeconds(1.5)
+                .addTemporalMarker(()->robot.moveClaw(false))
+                .waitSeconds(0.2)
+                .addTemporalMarker(()->{
+                    robot.moveGuide(false);
+                    robot.moveTwists(false);
+                    robot.setTowerTarget(5);
+                    robot.moveTowers(0.5);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(()->robot.moveClaw(true))
+                .strafeTo(getVec(prepScorePose), SampleMecanumDrive.getVelocityConstraint(12, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .waitSeconds(1)
+                .addTemporalMarker(()->robot.moveTowers(0))
                 .build();
-        drive.followTrajectory(traj1);
 
-        sleep(100);
-
-        Trajectory traj2 = drive.trajectoryBuilder(traj1.end())
-                .forward(7)
+        TrajectorySequence scoreConeTrajSeq = drive.trajectorySequenceBuilder(prepScorePose)
+                .strafeTo(getVec(scorePose))
+                .addTemporalMarker(()->{
+                    robot.setTowerTarget(DROP_HEIGHT);
+                    robot.moveTowers(1);
+                    robot.moveTwists(true);
+                    robot.moveWrist(true);
+                    robot.moveGuide(true);
+                })
+                .waitSeconds(1.5)
+                .addTemporalMarker(()->robot.moveClaw(false))
+                .waitSeconds(0.2)
+                .addTemporalMarker(()->{
+                    robot.moveGuide(false);
+                    robot.moveTwists(false);
+                    robot.moveWrist(false);
+                    robot.setTowerTarget(5);
+                    robot.moveTowers(0.5);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(()->robot.moveClaw(true))
+                .strafeTo(getVec(prepScorePose), SampleMecanumDrive.getVelocityConstraint(12, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .waitSeconds(1)
+                .addTemporalMarker(()->robot.moveTowers(0))
                 .build();
-        drive.followTrajectory(traj2);
 
-        TrajectorySequence traj3 = drive.trajectorySequenceBuilder(traj2.end())
-                .turn(Math.toRadians(45))
+        TrajectorySequence grabConeTrajSeq = drive.trajectorySequenceBuilder(prepScorePose)
+                .addTemporalMarker(()->{
+                    robot.moveClaw(false);
+                    robot.setTowerTarget(getConeHeight());
+                    robot.moveTowers(0.7);
+                })
+                .lineToSplineHeading(loadPose)
+                .addTemporalMarker(()->{
+                    robot.moveClaw(true);
+                    robot.setTowerTarget(100);
+                    robot.moveTowers(1);
+                })
+                .waitSeconds(1)
+                .addTemporalMarker(()->robot.moveTowers(0))
+                .strafeTo(getVec(prepScorePose))
                 .build();
-        drive.followTrajectorySequence(traj3);
-
-        robot.moveTwists(true);
 
 
-        Trajectory traj4 = drive.trajectoryBuilder(traj3.end())
-                .strafeTo(new Vector2d(-28, -6),
-                        SampleMecanumDrive.getVelocityConstraint(12, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .build();
-        drive.followTrajectory(traj4);
-
-
-        robot.leftTower.setTargetPosition(-2800);
-        robot.rightTower.setTargetPosition(-2800);
-        robot.leftTower.setPower(0.7);
-        robot.rightTower.setPower(0.7);
-        robot.leftTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.rightTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        while (robot.leftTower.isBusy() || robot.rightTower.isBusy()){
-
-        }
-
-        robot.moveClaw(false);
-
+        drive.followTrajectorySequence(startToPrepScoreTrajSeq);
+        sleep(200);
+        drive.followTrajectorySequence(scorePreLoadConeTrajSeq);
+        sleep(200);
+        drive.followTrajectorySequence(grabConeTrajSeq);
+        sleep(200);
+        drive.followTrajectorySequence(scoreConeTrajSeq);
         sleep(1000);
 
-        Trajectory traj5 = drive.trajectoryBuilder(traj4.end())
-                .forward(14)
-                .build();
-        drive.followTrajectory(traj5);
-
-        robot.moveClaw(true);
-        robot.moveWrist(false);
-        robot.moveTwists(false);
-        robot.moveTowers(-1);
-        sleep(500);
-
-        TrajectorySequence traj6 = drive.trajectorySequenceBuilder(traj5.end())
-                .turn(Math.toRadians(-45))
-                .build();
-        drive.followTrajectorySequence(traj6);
-
-        Trajectory traj7_1 = drive.trajectoryBuilder(traj6.end())
-                .strafeRight(30)
-                .build();
-        Trajectory traj7_2 = drive.trajectoryBuilder(traj6.end())
-                .strafeRight(2)
-                .build();
-        Trajectory traj7_3 = drive.trajectoryBuilder(traj6.end())
-                .strafeLeft(26)
-                .build();
-
-        switch (tagOfInterest.id) {
-            case 1:
-                drive.followTrajectory(traj7_1);
-                break;
-            case 2:
-                drive.followTrajectory(traj7_2);
-                break;
-            case 3:
-                drive.followTrajectory(traj7_3);
-                break;
-        }
-
-        robot.moveTowers(0);
-
-        sleep(2000);
 
     }
 
@@ -269,4 +277,12 @@ public class AutoRight extends LinearOpMode {
         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
     }
 
+    Vector2d getVec(Pose2d pose) {
+        return new Vector2d(pose.getX(), pose.getY());
+    }
+
+    int getConeHeight() {
+        highestConePos -= CONE_REDUCE_CONSTANT;
+        return highestConePos + CONE_REDUCE_CONSTANT;
+    }
 }

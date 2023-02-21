@@ -12,12 +12,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.HardwareRagnarok;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PoseStorage;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
-@TeleOp(name = "--MAIN-- Java TeleOp", group = "Ragnarok")
+@TeleOp(name = "--MAIN-- Java TeleOp", group = "-main")
 public class JavaTeleOp_v1 extends LinearOpMode {
 
     // Driving variables
@@ -27,23 +28,30 @@ public class JavaTeleOp_v1 extends LinearOpMode {
         GRID          // testing
     }
 
-    int MAX_TOWER_HEIGHT = 2460;
+    public static double MAX_FACTOR = 8.0;
+    public static double MIN_FACTOR = 3.0;
+    public static int FACTOR_POINT_1 = 20;
+    public static int FACTOR_POINT_2 = 50;
+    int MAX_TOWER_HEIGHT = 3178;
 
     private double bound(double min, double val, double max) {
-        return Math.min(Math.max(min, val), max);
+        return Math.min(Math.max( min, val), max);
     }
+    double f(double d) {return MIN_FACTOR-MAX_FACTOR/(FACTOR_POINT_2 - FACTOR_POINT_1) * (d - FACTOR_POINT_1) + MIN_FACTOR;}
 
     double speedChange1;
     double speedChange2;
 
     int towerHeight = 0;
+    int TOWER_SPEED_FACTOR = 50;
 
     // int targetTowerPosition;
 
     boolean clawPos = false;
-    boolean gp2_b_last_frame = false;
+    boolean gp2_a_last_frame = false;
 
     boolean flipState = false;
+    boolean goingDown = false;
     boolean gp2_x_last_frame = false;
 
     private Mode currentMode = Mode.NORMAL_CONTROL;
@@ -62,7 +70,10 @@ public class JavaTeleOp_v1 extends LinearOpMode {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         HardwareRagnarok robot = new HardwareRagnarok();
         robot.init(hardwareMap);
-        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.leftTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.leftTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.rightTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Turns on bulk reading
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
@@ -115,105 +126,44 @@ public class JavaTeleOp_v1 extends LinearOpMode {
                 speedChange2 = 0.7;
             }
 
+            towerHeight += TOWER_SPEED_FACTOR * -gamepad2.left_stick_y * speedChange2;
+            towerHeight = (int) bound(5, towerHeight, MAX_TOWER_HEIGHT * .8);
 
-            /**
-            double stickSpeed = 5;
-            towerHeight += -gamepad2.right_stick_y * stickSpeed;
-            double TOWER_SPEED_FACTOR = 0.01;
-            double leftTowerSpeed = -(towerHeight - robot.leftTower.getCurrentPosition()) * TOWER_SPEED_FACTOR;
-            double rightTowerSpeed = -(towerHeight - robot.rightTower.getCurrentPosition()) * TOWER_SPEED_FACTOR;
-            robot.leftTower.setPower(leftTowerSpeed);
-            robot.rightTower.setPower(rightTowerSpeed);
-            // **/
+            if (gamepad2.dpad_up) {
+                towerHeight = MAX_TOWER_HEIGHT;
+            }
+            if (gamepad2.dpad_right) {
+                towerHeight = 1530;
+            }
+            if (gamepad2.dpad_down) {
+                towerHeight = 5;
+                flipState = false;
+//                goingDown = true;
+            }
+//            if (robot.leftTower.getCurrentPosition() >= -7) {
+//                goingDown = false;
+//            }
+            goingDown = robot.leftTower.getVelocity() < -50;
 
-            /**
-            robot.rightTower.setTargetPosition(towerHeight);
+
+            double verticalSpeedGravityFactor = towerHeight - robot.leftTower.getCurrentPosition() < 0 ? 0.5 : 1;
+            double verticalSpeedDistanceFactor = bound(MIN_FACTOR, f(Math.abs(towerHeight - robot.leftTower.getCurrentPosition())), MAX_FACTOR);
+
             robot.leftTower.setTargetPosition(towerHeight);
-
+            robot.rightTower.setTargetPosition(towerHeight);
             robot.leftTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             robot.rightTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.leftTower.setPower(speedChange2 * verticalSpeedGravityFactor * verticalSpeedDistanceFactor);
+            robot.rightTower.setPower(speedChange2 * verticalSpeedGravityFactor * verticalSpeedDistanceFactor);
 
 
-            int ERROR_TOLERATION = 10;
+//            if (gamepad2.a && !gp2_a_last_frame) {
+//                clawPos = !clawPos;
+//            }
+//            gp2_a_last_frame = gamepad2.a;
+            double distance = robot.sensor.getDistance(DistanceUnit.MM);
 
-            double towerSpeedFactor = 0.5;
-
-            if ( !(Math.abs(robot.leftTower.getCurrentPosition() - robot.rightTower.getCurrentPosition()) >= ERROR_TOLERATION) ) {
-                if ( robot.leftTower.isBusy() ) {
-                    robot.leftTower.setPower( -speedChange2 * towerSpeedFactor );
-                } else {
-                    robot.leftTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    robot.leftTower.setPower(0);
-                }
-                if ( robot.rightTower.isBusy() ) {
-                    robot.rightTower.setPower( -speedChange2 * towerSpeedFactor );
-                } else {
-                    robot.rightTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    robot.rightTower.setPower(0);
-                }
-            }
-
-
-            /**
-            if ( (Math.abs(towerHeight - robot.leftTower.getCurrentPosition()) >= ERROR_TOLERATION
-               || Math.abs(towerHeight - robot.rightTower.getCurrentPosition()) >= ERROR_TOLERATION)
-               && !( Math.abs(robot.leftTower.getCurrentPosition() - robot.rightTower.getCurrentPosition()) >= ERROR_TOLERATION )) {
-                robot.leftTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robot.rightTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robot.rightTower.setPower( - speedChange2 * towerSpeedFactor * (robot.rightTower.isBusy() ? 1:0));
-                robot.leftTower.setPower( - speedChange2 * towerSpeedFactor * (robot.leftTower.isBusy() ? 1:0));
-            } else {
-                robot.leftTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                robot.rightTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                robot.leftTower.setPower(0);
-                robot.rightTower.setPower(0);
-            }
-            // **/
-
-            /**
-            if (-gamepad2.left_stick_y != 0) {
-                robot.leftTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robot.rightTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robot.rightTower.setPower(speedChange2 * towerSpeedFactor * -gamepad2.left_stick_y * (robot.rightTower.isBusy() ? 1:0));
-                robot.leftTower.setPower(speedChange2 * towerSpeedFactor * -gamepad2.left_stick_y * (robot.leftTower.isBusy() ? 1:0));
-            } else {
-                robot.leftTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                robot.rightTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                robot.leftTower.setPower(0);
-                robot.rightTower.setPower(0);
-            }
-            // **/
-
-
-            /** if (gamepad2.b) { targetTowerPosition = 0; }
-            else if (gamepad2.x) { targetTowerPosition = 2000; }
-
-            robot.leftTower.setTargetPosition(targetTowerPosition);
-            robot.rightTower.setTargetPosition(targetTowerPosition);
-
-            if (!robot.leftTower.getMode().equals(DcMotor.RunMode.RUN_TO_POSITION)) {
-                robot.leftTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            }
-            if (!robot.rightTower.getMode().equals(DcMotor.RunMode.RUN_TO_POSITION)) {
-                robot.rightTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            }
-
-            robot.rightTower.setPower( robot.rightTower.isBusy() ? speedChange2 : 0 );
-            robot.leftTower.setPower( robot.leftTower.isBusy() ? speedChange2 : 0 );
-            // **/
-
-
-            double towerSpeed;
-            towerSpeed = gamepad2.left_stick_y * speedChange2;
-            robot.leftTower.setPower(towerSpeed);
-            robot.rightTower.setPower(towerSpeed);
-
-
-            if (gamepad2.a && !gp2_b_last_frame) {
-                clawPos = !clawPos;
-            }
-            gp2_b_last_frame = gamepad2.a;
-
+            clawPos = goingDown || (gamepad2.a ^ distance <= robot.CLOSE_DISTANCE_MM);
 
             if (gamepad2.x && !gp2_x_last_frame) {
                 flipState = !flipState;
@@ -221,24 +171,13 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             gp2_x_last_frame = gamepad2.x;
 
             robot.moveTwists(flipState);
-
             robot.moveWrist(flipState && !gamepad2.b);
-
             robot.moveClaw(clawPos);
+            robot.moveGuide(clawPos && flipState);
 
-            if (gamepad1.start && gamepad1.dpad_up) {
-                drive.getLocalizer().setPoseEstimate(new Pose2d(-63, 60, Math.PI/2));
-            }
-
-            switch (currentMode) {
-            //Distance to Tower
-
-
-                case NORMAL_CONTROL:
-
-                    ly = -gamepad1.left_stick_y;
-                    lx = -gamepad1.left_stick_x;
-                    rx = -gamepad1.right_stick_x;
+            ly = -gamepad1.left_stick_y;
+            lx = -gamepad1.left_stick_x;
+            rx = -gamepad1.right_stick_x;
 
                     //Normal Robot Control
                     driveDirection = new Pose2d(
@@ -251,36 +190,7 @@ public class JavaTeleOp_v1 extends LinearOpMode {
                     if (gamepad1.dpad_left) {
                         currentMode = Mode.GRID;
                     }
-                    break;
 
-                case GRID: // Switch to normal control if gamepad1 dpad right is activated
-
-                    if (gamepad1.dpad_right) {
-                        currentMode = Mode.NORMAL_CONTROL;
-                    }
-
-                    ly = -gamepad1.left_stick_y;
-                    lx = -gamepad1.left_stick_x;
-                    rx =  gamepad1.right_stick_x;
-
-                    Vector2d fieldFrameInput = new Vector2d(
-                            Math.signum(ly) * Math.pow(ly, 2) * speedChange1,
-                            Math.signum(lx) * Math.pow(lx, 2) * speedChange1
-                    );
-
-                    Vector2d robotFrameInput = fieldFrameInput.rotated(-poseEstimate.getHeading());
-                    //headingController.setTargetPosition(rx * speedChange1);
-
-                    double headingInput = Math.signum(rx) * Math.pow(rx, 2) * speedChange1;
-
-                    driveDirection = new Pose2d(
-                            robotFrameInput,
-                            headingInput
-                    );
-
-                    break;
-
-            }
 
             //Dashboard View
             fieldOverlay.setStroke("#3F51B5");
@@ -297,6 +207,7 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
             telemetry.addData("Target Tower Height", towerHeight);
+            telemetry.addData("gamepad2.left_stick_y", gamepad2.left_stick_y);
             telemetry.addData("Left Tower Height", robot.leftTower.getCurrentPosition());
             telemetry.addData("Right Tower Height", robot.rightTower.getCurrentPosition());
             // telemetry.addData("Tower Speeds", leftTowerSpeed + ", " + rightTowerSpeed);

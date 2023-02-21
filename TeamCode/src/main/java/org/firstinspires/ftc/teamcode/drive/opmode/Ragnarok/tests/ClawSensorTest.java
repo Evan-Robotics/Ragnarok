@@ -21,7 +21,7 @@ public class ClawSensorTest extends LinearOpMode {
     @Override
     public void runOpMode() {
         claw = hardwareMap.get(Servo.class, "CLAW");
-        sensor = hardwareMap.get(RevColorSensorV3.class, "CLAW SENSOR");
+        sensor = hardwareMap.get(RevColorSensorV3.class, "SENSOR");
 
         waitForStart();
 

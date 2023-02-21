@@ -15,7 +15,7 @@ public class SliderPID extends LinearOpMode {
     public static int TOLERANCE = 10;
     public static int HEIGHT = 1000;
 
-    public static double Kp = 0.001;
+    public static double Kp = 0.00001;
     public static double Ki = 0;
     public static double Kd = 0;
     public static double Kg = 0.1;
