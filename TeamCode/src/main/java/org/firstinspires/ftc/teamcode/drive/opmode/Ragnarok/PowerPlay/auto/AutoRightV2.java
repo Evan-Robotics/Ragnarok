@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.auto;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -12,7 +11,6 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.HardwareRagnarok;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
-import org.jetbrains.annotations.NotNull;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -25,12 +23,12 @@ import java.util.ArrayList;
  */
 
 @Config
-@Autonomous(name="--WIP-- Left")
-public class AutoLeftV2 extends LinearOpMode {
+@Autonomous(name="--WIP-- Right")
+public class AutoRightV2 extends LinearOpMode {
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
 
-    public static Pose2d START_POSITION = new Pose2d(-39.875, -61.75, -Math.PI/2);
+    public static Pose2d START_POSITION = new Pose2d(32.125, -61.75, -Math.PI/2);
     public static int LOAD_HEIGHT = 1280;
 
     public static int PRELOAD_HEIGHT = 930;
@@ -174,17 +172,17 @@ public class AutoLeftV2 extends LinearOpMode {
         if (isStopRequested()) return;
 
 
-        Pose2d prepStrafePose = new Pose2d(-36, -54, Math.PI);
-        Pose2d almostLoadPose = new Pose2d(-56, -12, Math.PI);
-        Pose2d loadPose = new Pose2d(-61.5, -12, Math.PI);
-        Pose2d pathingPose1 = new Pose2d(-44,-12,Math.PI);
-        Pose2d midPreloadPrepPose = new Pose2d(-34,-24, Math.PI);
-        Pose2d midPreloadPose = new Pose2d(-30, -24, Math.PI);
-        Pose2d midScorePose = new Pose2d(-24 - 6 * Math.sqrt(3)/2, -24 + 6/2, Math.PI * 5/6);
-        Pose2d prepPark = new Pose2d(-36, -12, Math.PI/2);
-        Pose2d park1Pose = new Pose2d(-58, -18, Math.PI/2);
-        Pose2d park2Pose = new Pose2d(-36, -18, Math.PI/2);
-        Pose2d park3Pose = new Pose2d(-12, -18, Math.PI/2);
+        Pose2d prepStrafePose = new Pose2d(36, -54, 0);
+        Pose2d almostLoadPose = new Pose2d(56, -12, 0);
+        Pose2d loadPose = new Pose2d(61.5, -12, 0);
+        Pose2d pathingPose1 = new Pose2d(44,-12, 0);
+        Pose2d midPreloadPrepPose = new Pose2d(34,-24, 0);
+        Pose2d midPreloadPose = new Pose2d(30, -24, 0);
+        Pose2d midScorePose = new Pose2d(24 + 6 * Math.sqrt(3)/2, -24 + 6/2, Math.PI/6);
+        Pose2d prepPark = new Pose2d(36, -12, Math.PI/2);
+        Pose2d park1Pose = new Pose2d(12, -18, Math.PI/2);
+        Pose2d park2Pose = new Pose2d(36, -18, Math.PI/2);
+        Pose2d park3Pose = new Pose2d(58, -18, Math.PI/2);
 
         TrajectorySequence scorePreloadTrajSeq = drive.trajectorySequenceBuilder(START_POSITION)
                 .addTemporalMarker(0.5, ()->{
@@ -194,9 +192,9 @@ public class AutoLeftV2 extends LinearOpMode {
                     robot.moveTowers(1);
                     robot.moveTwists(true);
                 })
-                .setTangent(Math.PI/4)
+                .setTangent(Math.PI /4)
                 .splineToSplineHeading(prepStrafePose, Math.PI/2)
-                .splineToSplineHeading(midPreloadPrepPose, Math.PI/3)
+                .splineToSplineHeading(midPreloadPrepPose, Math.PI* 2/3)
                 .addTemporalMarker(()->{
                     robot.moveGuide(true);
                 })
@@ -216,8 +214,8 @@ public class AutoLeftV2 extends LinearOpMode {
 
         TrajectorySequence preloadToLoadTrajSeq = drive.trajectorySequenceBuilder(midPreloadPose)
                 .setTangent(Math.PI)
-                .splineToConstantHeading(getVec(pathingPose1),Math.PI)
-                .splineToConstantHeading(getVec(almostLoadPose), Math.PI)
+                .splineToConstantHeading(getVec(pathingPose1), 0)
+                .splineToConstantHeading(getVec(almostLoadPose), 0)
                 .setAccelConstraint((v, pose2d, pose2d1, pose2d2) -> 10)
                 .splineToConstantHeading(getVec(loadPose), Math.PI)
                 .resetAccelConstraint()
@@ -238,8 +236,8 @@ public class AutoLeftV2 extends LinearOpMode {
                 .build();
 
         TrajectorySequence scoreMidTrajSeq = drive.trajectorySequenceBuilder(loadPose)
-                .setTangent(0)
-                .splineToSplineHeading(midScorePose, -Math.PI/6)
+                .setTangent(Math.PI)
+                .splineToSplineHeading(midScorePose, Math.PI * 7/6)
                 .addTemporalMarker(()->{
                     robot.moveClaw(false);
                     sleep(100);
@@ -254,10 +252,10 @@ public class AutoLeftV2 extends LinearOpMode {
                 .build();
 
         TrajectorySequence loadConeTrajSeq = drive.trajectorySequenceBuilder(midScorePose)
-                .setTangent(Math.PI * 5/6)
-                .splineToSplineHeading(almostLoadPose, Math.PI)
+                .setTangent(Math.PI/6)
+                .splineToSplineHeading(almostLoadPose, 0)
                 .setAccelConstraint((v, pose2d, pose2d1, pose2d2) -> 15)
-                .splineToConstantHeading(getVec(loadPose), Math.PI)
+                .splineToConstantHeading(getVec(loadPose), 0)
                 .resetAccelConstraint()
                 .addTemporalMarker(()->{
                     robot.moveClaw(true);
@@ -275,7 +273,7 @@ public class AutoLeftV2 extends LinearOpMode {
                 .build();
 
         TrajectorySequence prepParkTrajSeq = drive.trajectorySequenceBuilder(midScorePose)
-                .setTangent(Math.PI * 5/6)
+                .setTangent(Math.PI/6)
                 .addTemporalMarker(()->{
                     robot.moveClaw(true);
                     robot.setTowerTarget(5);
@@ -283,7 +281,7 @@ public class AutoLeftV2 extends LinearOpMode {
                     robot.moveWrist(false);
                     robot.moveTwists(false);
                 })
-                .splineToLinearHeading(prepPark, Math.PI * 5/6)
+                .splineToLinearHeading(prepPark, Math.PI/6)
                 .build();
 
         TrajectorySequence park1TrajSeq = drive.trajectorySequenceBuilder(prepPark)

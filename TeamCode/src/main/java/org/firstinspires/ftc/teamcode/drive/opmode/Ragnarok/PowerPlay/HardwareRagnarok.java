@@ -60,7 +60,11 @@ public class HardwareRagnarok {
 
     public Servo guide = null;
     public static double GUIDE_POS_1 = 0.05;
-    public static double GUIDE_POS_2 = 0.38;
+    public static double GUIDE_POS_2 = 0.48;
+
+    public Servo flag = null;
+    public static double FLAG_POS_1 = 0;
+    public static double FLAG_POS_2 = 0.5;
 
     public RevColorSensorV3 sensor = null;
     public static double CLOSE_DISTANCE_MM = 12;
@@ -81,9 +85,9 @@ public class HardwareRagnarok {
 
         // Define and Initialize Motors
         leftTower = ahwMap.get(DcMotorEx.class, "LEFT TOWER");
-        leftTower.setDirection(DcMotorEx.Direction.FORWARD);
+        leftTower.setDirection(DcMotorEx.Direction.REVERSE);
         rightTower = ahwMap.get(DcMotorEx.class, "RIGHT TOWER");
-        rightTower.setDirection(DcMotorEx.Direction.REVERSE);
+        rightTower.setDirection(DcMotorEx.Direction.FORWARD);
 
         // Set all motors to zero power
         leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -117,12 +121,18 @@ public class HardwareRagnarok {
         guide.setDirection(Servo.Direction.FORWARD);
         guide.setPosition(GUIDE_POS_1);
 
+        flag = ahwMap.get(Servo.class, "FLAG");
+        flag.setDirection(Servo.Direction.FORWARD);
+        flag.setPosition(FLAG_POS_1);
+
         sensor = ahwMap.get(RevColorSensorV3.class, "SENSOR");
 
     }
     public void towersPositionMode() {
         leftTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftTower.setTargetPosition(2);
+        rightTower.setTargetPosition(2);
         leftTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
@@ -149,4 +159,6 @@ public class HardwareRagnarok {
     }
 
     public void moveGuide(boolean pos) { guide.setPosition(pos ? GUIDE_POS_2 : GUIDE_POS_1); }
+
+    public void moveFlag(boolean pos) { flag.setPosition(pos ? FLAG_POS_2 : FLAG_POS_1); }
 }

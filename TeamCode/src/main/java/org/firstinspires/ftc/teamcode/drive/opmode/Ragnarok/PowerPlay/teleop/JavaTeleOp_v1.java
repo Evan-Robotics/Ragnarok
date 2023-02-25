@@ -28,10 +28,10 @@ public class JavaTeleOp_v1 extends LinearOpMode {
         GRID          // testing
     }
 
-    public static double MAX_FACTOR = 8.0;
+    public static double MAX_FACTOR = 20.0;
     public static double MIN_FACTOR = 3.0;
-    public static int FACTOR_POINT_1 = 20;
-    public static int FACTOR_POINT_2 = 50;
+    public static int FACTOR_POINT_1 = 10;
+    public static int FACTOR_POINT_2 = 30;
     int MAX_TOWER_HEIGHT = 3178;
 
     private double bound(double min, double val, double max) {
@@ -48,11 +48,12 @@ public class JavaTeleOp_v1 extends LinearOpMode {
     // int targetTowerPosition;
 
     boolean clawPos = false;
-    boolean gp2_a_last_frame = false;
 
     boolean flipState = false;
     boolean goingDown = false;
     boolean gp2_x_last_frame = false;
+
+    boolean sensorLastFrame = false;
 
     private Mode currentMode = Mode.NORMAL_CONTROL;
     private PIDFController headingController = new PIDFController(SampleMecanumDrive.HEADING_PID);
@@ -61,7 +62,7 @@ public class JavaTeleOp_v1 extends LinearOpMode {
     private Vector2d storage_pos = new Vector2d(-66, 37);
 
     //Timers
-    private final ElapsedTime motorTimer = new ElapsedTime();
+    private final ElapsedTime flagAnimationTimer = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -72,8 +73,6 @@ public class JavaTeleOp_v1 extends LinearOpMode {
         robot.init(hardwareMap);
         robot.leftTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.rightTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.leftTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.rightTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Turns on bulk reading
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
@@ -127,24 +126,36 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             }
 
             towerHeight += TOWER_SPEED_FACTOR * -gamepad2.left_stick_y * speedChange2;
-            towerHeight = (int) bound(5, towerHeight, MAX_TOWER_HEIGHT * .8);
+            towerHeight = (int) bound(5, towerHeight, 2350);
 
             if (gamepad2.dpad_up) {
-                towerHeight = MAX_TOWER_HEIGHT;
+                towerHeight = 2350;
             }
             if (gamepad2.dpad_right) {
-                towerHeight = 1530;
+                towerHeight = 1290;
             }
             if (gamepad2.dpad_down) {
                 towerHeight = 5;
                 flipState = false;
-//                goingDown = true;
+                goingDown = true;
             }
-//            if (robot.leftTower.getCurrentPosition() >= -7) {
-//                goingDown = false;
-//            }
-            goingDown = robot.leftTower.getVelocity() < -50;
+            if (robot.leftTower.getCurrentPosition() <= 10) {
+                goingDown = false;
+            }
 
+            double distance = robot.sensor.getDistance(DistanceUnit.MM);
+            boolean withinDistance = distance <= robot.CLOSE_DISTANCE_MM;
+
+            if (!sensorLastFrame && withinDistance) {
+                flagAnimationTimer.reset();
+            }
+            sensorLastFrame = withinDistance;
+
+            if (withinDistance) {
+                robot.flag.setPosition((Math.floor(flagAnimationTimer.seconds() * 6 + 1) % 2) * .25 + .25);
+            } else {
+                robot.moveFlag(false);
+            }
 
             double verticalSpeedGravityFactor = towerHeight - robot.leftTower.getCurrentPosition() < 0 ? 0.5 : 1;
             double verticalSpeedDistanceFactor = bound(MIN_FACTOR, f(Math.abs(towerHeight - robot.leftTower.getCurrentPosition())), MAX_FACTOR);
@@ -156,14 +167,12 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             robot.leftTower.setPower(speedChange2 * verticalSpeedGravityFactor * verticalSpeedDistanceFactor);
             robot.rightTower.setPower(speedChange2 * verticalSpeedGravityFactor * verticalSpeedDistanceFactor);
 
-
 //            if (gamepad2.a && !gp2_a_last_frame) {
 //                clawPos = !clawPos;
 //            }
 //            gp2_a_last_frame = gamepad2.a;
-            double distance = robot.sensor.getDistance(DistanceUnit.MM);
 
-            clawPos = goingDown || (gamepad2.a ^ distance <= robot.CLOSE_DISTANCE_MM);
+            clawPos = (goingDown || distance <= robot.CLOSE_DISTANCE_MM) && !gamepad2.a;
 
             if (gamepad2.x && !gp2_x_last_frame) {
                 flipState = !flipState;
@@ -174,6 +183,7 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             robot.moveWrist(flipState && !gamepad2.b);
             robot.moveClaw(clawPos);
             robot.moveGuide(clawPos && flipState);
+//            robot.moveFlag(distance <= robot.CLOSE_DISTANCE_MM);
 
             ly = -gamepad1.left_stick_y;
             lx = -gamepad1.left_stick_x;
