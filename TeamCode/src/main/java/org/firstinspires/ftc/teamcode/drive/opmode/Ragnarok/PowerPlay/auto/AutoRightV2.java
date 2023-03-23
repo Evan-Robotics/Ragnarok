@@ -192,7 +192,7 @@ public class AutoRightV2 extends LinearOpMode {
                     robot.moveTowers(1);
                     robot.moveTwists(true);
                 })
-                .setTangent(Math.PI /4)
+                .setTangent(Math.PI *3/4)
                 .splineToSplineHeading(prepStrafePose, Math.PI/2)
                 .splineToSplineHeading(midPreloadPrepPose, Math.PI* 2/3)
                 .addTemporalMarker(()->{
@@ -227,7 +227,7 @@ public class AutoRightV2 extends LinearOpMode {
                 .addTemporalMarker(()->{
                     robot.setTowerTarget(LOAD_HEIGHT);
                 })
-                .waitSeconds(0.2)
+                .waitSeconds(0.3)
                 .addTemporalMarker(()->{
                     robot.moveTwists(true);
                     robot.moveWrist(true);

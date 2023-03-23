@@ -229,7 +229,7 @@ public class AutoLeftV2 extends LinearOpMode {
                 .addTemporalMarker(()->{
                     robot.setTowerTarget(LOAD_HEIGHT);
                 })
-                .waitSeconds(0.2)
+                .waitSeconds(0.3)
                 .addTemporalMarker(()->{
                     robot.moveTwists(true);
                     robot.moveWrist(true);

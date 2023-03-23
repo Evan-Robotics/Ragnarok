@@ -137,11 +137,11 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             if (gamepad2.dpad_down) {
                 towerHeight = 5;
                 flipState = false;
-                goingDown = true;
+//                goingDown = true;
             }
-            if (robot.leftTower.getCurrentPosition() <= 10) {
-                goingDown = false;
-            }
+//            if (robot.leftTower.getCurrentPosition() <= 10) {
+//                goingDown = false;
+//            }
 
             double distance = robot.sensor.getDistance(DistanceUnit.MM);
             boolean withinDistance = distance <= robot.CLOSE_DISTANCE_MM;
@@ -151,10 +151,10 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             }
             sensorLastFrame = withinDistance;
 
-            if (withinDistance) {
-                robot.flag.setPosition((Math.floor(flagAnimationTimer.seconds() * 6 + 1) % 2) * .25 + .25);
+            if (flagAnimationTimer.seconds() <= 5 && withinDistance) {
+                robot.flag.setPosition((Math.floor(flagAnimationTimer.seconds() * 6 + 1) % 2) * .2 + .2);
             } else {
-                robot.moveFlag(false);
+                robot.moveFlag(withinDistance);
             }
 
             double verticalSpeedGravityFactor = towerHeight - robot.leftTower.getCurrentPosition() < 0 ? 0.5 : 1;
@@ -172,7 +172,7 @@ public class JavaTeleOp_v1 extends LinearOpMode {
 //            }
 //            gp2_a_last_frame = gamepad2.a;
 
-            clawPos = (goingDown || distance <= robot.CLOSE_DISTANCE_MM) && !gamepad2.a;
+            clawPos = distance <= robot.CLOSE_DISTANCE_MM && !gamepad2.a;
 
             if (gamepad2.x && !gp2_x_last_frame) {
                 flipState = !flipState;
@@ -182,7 +182,7 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             robot.moveTwists(flipState);
             robot.moveWrist(flipState && !gamepad2.b);
             robot.moveClaw(clawPos);
-            robot.moveGuide(clawPos && flipState);
+//            robot.moveGuide(clawPos && flipState);
 //            robot.moveFlag(distance <= robot.CLOSE_DISTANCE_MM);
 
             ly = -gamepad1.left_stick_y;

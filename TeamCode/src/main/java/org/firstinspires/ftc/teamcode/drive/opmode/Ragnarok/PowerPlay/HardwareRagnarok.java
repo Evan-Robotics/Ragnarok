@@ -64,7 +64,7 @@ public class HardwareRagnarok {
 
     public Servo flag = null;
     public static double FLAG_POS_1 = 0;
-    public static double FLAG_POS_2 = 0.5;
+    public static double FLAG_POS_2 = 0.35;
 
     public RevColorSensorV3 sensor = null;
     public static double CLOSE_DISTANCE_MM = 12;
