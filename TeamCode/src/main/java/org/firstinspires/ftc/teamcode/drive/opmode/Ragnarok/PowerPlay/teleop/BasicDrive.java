@@ -69,10 +69,10 @@ public class BasicDrive extends LinearOpMode {
                     double turnSpeed = turnDirection * gamepad1.right_stick_x;
                     double strafeSpeed = strafeDirection * gamepad1.left_stick_x;
 
-                    front_left_power = moveSpeed + turnSpeed + strafeSpeed;
+                    front_left_power  = moveSpeed + turnSpeed + strafeSpeed;
                     front_right_power = moveSpeed - turnSpeed - strafeSpeed;
-                    back_left_power = moveSpeed + turnSpeed - strafeSpeed;
-                    back_right_power = moveSpeed - turnSpeed + strafeSpeed;
+                    back_left_power   = moveSpeed + turnSpeed - strafeSpeed;
+                    back_right_power  = moveSpeed - turnSpeed + strafeSpeed;
                     break;
                 }
 

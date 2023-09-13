@@ -3,12 +3,10 @@ package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.auto;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.HardwareRagnarok;
@@ -20,15 +18,15 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
+
 @Config
-@Autonomous(name="--MAIN-- Left Auto")
-public class AutoLeft extends LinearOpMode {
-
-    public static int TIME_UP = 500;
-
-
+@Autonomous(name="--Consistent-- Preload Right")
+public class RightPreload extends LinearOpMode {
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
+
+    public static Pose2d START_POSITION = new Pose2d(24+15.5/2, -61.5, -Math.PI/2);
+    public static int LOAD_HEIGHT = 1310;
 
     static final double FEET_PER_METER = 3.28084;
 
@@ -50,10 +48,13 @@ public class AutoLeft extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        drive.setPoseEstimate(new Pose2d(-39.875, -62.5, Math.toRadians(-90)));
+        drive.setPoseEstimate(START_POSITION);
 
         HardwareRagnarok robot = new HardwareRagnarok();
         robot.init(hardwareMap);
+        robot.moveWrist(true);
+
+        robot.towersPositionMode();
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -153,107 +154,92 @@ public class AutoLeft extends LinearOpMode {
         //PUT AUTON CODE HERE (DRIVER PRESSED THE PLAY BUTTON!)
 
         robot.moveClaw(true);
-        robot.moveWrist(false);
+        robot.moveWrist(true);
         robot.moveTwists(false);
+        robot.moveGuide(false);
+        robot.setTowerTarget(5);
+        robot.towersPositionMode();
 
         if (isStopRequested()) return;
-        sleep(100);
-//
-//        Trajectory beginning_to_junct_1 = drive.trajectoryBuilder(new Pose2d(35, -62.5, Math.toRadians(-90)), true)
-//                .back(75.5)
-//                .build();
-//
-//        drive.followTrajectory(beginning_to_junct_1);
-        Trajectory traj0 = drive.trajectoryBuilder(drive.getPoseEstimate())
-                .strafeTo(new Vector2d(-35.5, -58.25))
-                .build();
-        drive.followTrajectory(traj0);
-
-        Trajectory traj1 = drive.trajectoryBuilder(traj0.end())
-                .back(50)
-                .build();
-        drive.followTrajectory(traj1);
-
-        sleep(100);
-
-        Trajectory traj2 = drive.trajectoryBuilder(traj1.end())
-                .forward(7)
-                .build();
-        drive.followTrajectory(traj2);
-
-        TrajectorySequence traj3 = drive.trajectorySequenceBuilder(traj2.end())
-                .turn(Math.toRadians(-45))
-                .build();
-        drive.followTrajectorySequence(traj3);
-
-        robot.moveTwists(true);
 
 
-        Trajectory traj4 = drive.trajectoryBuilder(traj3.end())
-                .strafeTo(new Vector2d(-27, -6),
-                        SampleMecanumDrive.getVelocityConstraint(12, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .build();
-        drive.followTrajectory(traj4);
+        Pose2d strafeNode1 = new Pose2d(32, -60, -Math.PI/2);
+        Pose2d strafeNode2 = new Pose2d(34, -52.5, 0);
+        Pose2d midPreloadPrepPose = new Pose2d(34,-25, 0);
+        Pose2d midPreloadPose = new Pose2d(30, -24, 0);
+        Pose2d prepPark = new Pose2d(36, -12, Math.PI/2);
+        Pose2d park3Pose = new Pose2d(58, -18, Math.PI/2);
+        Pose2d park2Pose = new Pose2d(36, -18, Math.PI/2);
+        Pose2d park1Pose = new Pose2d(14, -18, Math.PI/2);
 
-
-        robot.moveTowers(0.4);
-
-
-        sleep(TIME_UP);
-
-        robot.moveTowers(-0.5);
-
-        sleep(TIME_UP/2);
-
-        robot.moveClaw(false);
-
-        robot.moveTowers(0);
-
-        sleep(1000);
-
-        Trajectory traj5 = drive.trajectoryBuilder(traj4.end())
-                .forward(14)
-                .build();
-        drive.followTrajectory(traj5);
-
-        robot.moveClaw(true);
-        robot.moveWrist(false);
-        robot.moveTwists(false);
-        robot.moveTowers(-1);
-        sleep(500);
-
-        TrajectorySequence traj6 = drive.trajectorySequenceBuilder(traj5.end())
-                .turn(Math.toRadians(45))
-                .build();
-        drive.followTrajectorySequence(traj6);
-
-        Trajectory traj7_1 = drive.trajectoryBuilder(traj6.end())
-                .strafeRight(30)
-                .build();
-        Trajectory traj7_2 = drive.trajectoryBuilder(traj6.end())
-                .strafeRight(2)
-                .build();
-        Trajectory traj7_3 = drive.trajectoryBuilder(traj6.end())
-                .strafeLeft(26)
+        TrajectorySequence scorePreloadTrajSeq = drive.trajectorySequenceBuilder(START_POSITION)
+                .addTemporalMarker(0.5, ()->{
+                                robot.setTowerTarget(LOAD_HEIGHT+50);
+                                telemetry.addData("tower target", robot.leftTower.getTargetPosition());
+                                telemetry.update();
+                                robot.moveTowers(1);
+                                robot.moveTwists(true);
+                })
+                .setTangent(Math.PI / 4)
+                .splineToConstantHeading(getVec(strafeNode1), Math.PI / 2)
+                .splineToSplineHeading(strafeNode2, Math.PI / 2)
+                .splineToSplineHeading(midPreloadPrepPose, 2*Math.PI / 3)
+                .addTemporalMarker(()->{
+                                robot.moveGuide(true);
+                })
+                .splineToConstantHeading(getVec(midPreloadPose), 0)
+                .waitSeconds(0.1)
+                .addTemporalMarker(()->{
+                                robot.moveClaw(false);
+                                sleep(100);
+                                robot.moveGuide(false);
+                })
+                .waitSeconds(0.2)
+                .addTemporalMarker(()->{
+                                robot.moveTwists(false);
+                                robot.moveWrist(false);
+                                robot.setTowerTarget(5);
+                })
                 .build();
 
-        switch (tagOfInterest.id) {
-            case 1:
-                drive.followTrajectory(traj7_1);
-                break;
-            case 2:
-                drive.followTrajectory(traj7_2);
-                break;
-            case 3:
-                drive.followTrajectory(traj7_3);
-                break;
+
+        TrajectorySequence prepParkTrajSeq = drive.trajectorySequenceBuilder(midPreloadPose)
+                .setTangent(0)
+                .addTemporalMarker(()->{
+                    robot.moveClaw(true);
+                    robot.setTowerTarget(5);
+                    robot.moveGuide(false);
+                    robot.moveWrist(false);
+                    robot.moveTwists(false);
+                })
+                .splineToLinearHeading(prepPark, Math.PI /6)
+                .build();
+
+        TrajectorySequence park1TrajSeq = drive.trajectorySequenceBuilder(prepPark)
+                .setTangent(0)
+                .splineToConstantHeading(getVec(park1Pose), Math.PI *3/2)
+                .build();
+
+        TrajectorySequence park2TrajSeq = drive.trajectorySequenceBuilder(prepPark)
+                .setTangent(Math.PI /2)
+                .splineToConstantHeading(getVec(park2Pose), Math.PI * 3/2)
+                .build();
+
+        TrajectorySequence park3TrajSeq = drive.trajectorySequenceBuilder(prepPark)
+                .setTangent(Math.PI)
+                .splineToConstantHeading(getVec(park3Pose), Math.PI * 3/2)
+                .build();
+
+        drive.followTrajectorySequence(scorePreloadTrajSeq);
+        drive.followTrajectorySequence(prepParkTrajSeq);
+
+        if (tagOfInterest == null || tagOfInterest.id == 2) {
+            drive.followTrajectorySequence(park2TrajSeq);
+        } else if (tagOfInterest.id == 1) {
+            drive.followTrajectorySequence(park1TrajSeq);
+        } else if (tagOfInterest.id == 3) {
+            drive.followTrajectorySequence(park3TrajSeq);
         }
-
-        robot.moveTowers(0);
-
-        sleep(2000);
-
     }
 
     void tagToTelemetry(AprilTagDetection detection)
@@ -266,6 +252,10 @@ public class AutoLeft extends LinearOpMode {
         telemetry.addLine(String.format("Rotation Yaw: %.2f degrees", Math.toDegrees(detection.pose.yaw)));
         telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(detection.pose.pitch)));
         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
+    }
+
+    Vector2d getVec(Pose2d pose) {
+        return new Vector2d(pose.getX(), pose.getY());
     }
 
 }

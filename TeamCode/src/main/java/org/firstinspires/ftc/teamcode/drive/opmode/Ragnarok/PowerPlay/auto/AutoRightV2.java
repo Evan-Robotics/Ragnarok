@@ -18,10 +18,6 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-/*
- * This is an example of a more complex path to really test the tuning.
- */
-
 @Config
 @Autonomous(name="--WIP-- Right")
 public class AutoRightV2 extends LinearOpMode {

@@ -19,9 +19,6 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-/*
- * This is an example of a more complex path to really test the tuning.
- */
 @Autonomous(name="--backup-- Just Park")
 public class ConsistentPark extends LinearOpMode {
 
@@ -49,7 +46,7 @@ public class ConsistentPark extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        drive.setPoseEstimate(new Pose2d(-39.875, -62.5, Math.toRadians(-90)));
+        drive.setPoseEstimate(new Pose2d(-48 + 15.5/2, -61.75, -Math.PI/2));
 
         HardwareRagnarok robot = new HardwareRagnarok();
         robot.init(hardwareMap);
@@ -175,25 +172,28 @@ public class ConsistentPark extends LinearOpMode {
 
         sleep(100);
 
-                Trajectory traj2_1 = drive.trajectoryBuilder(traj1.end())
-                .strafeRight(26)
+        TrajectorySequence traj2_1 = drive.trajectorySequenceBuilder(traj1.end())
+                .setTangent(Math.PI)
+                .splineToLinearHeading(new Pose2d(-60, -18, -Math.PI/2), -Math.PI/2)
                 .build();
-        Trajectory traj2_2 = drive.trajectoryBuilder(traj1.end())
-                .strafeRight(2)
+        TrajectorySequence traj2_2 = drive.trajectorySequenceBuilder(traj1.end())
+                .setTangent(0)
+                .splineToLinearHeading(new Pose2d(-36, -18, -Math.PI/2), -Math.PI/2)
                 .build();
-        Trajectory traj2_3 = drive.trajectoryBuilder(traj1.end())
-                .strafeLeft(26)
+        TrajectorySequence traj2_3 = drive.trajectorySequenceBuilder(traj1.end())
+                .setTangent(0)
+                .splineToLinearHeading(new Pose2d(-13, -18, -Math.PI/2), -Math.PI/2)
                 .build();
 
         switch (tagOfInterest.id) {
             case 1:
-                drive.followTrajectory(traj2_1);
+                drive.followTrajectorySequence(traj2_1);
                 break;
             case 2:
-                drive.followTrajectory(traj2_2);
+                drive.followTrajectorySequence(traj2_2);
                 break;
             case 3:
-                drive.followTrajectory(traj2_3);
+                drive.followTrajectorySequence(traj2_3);
                 break;
         }
 

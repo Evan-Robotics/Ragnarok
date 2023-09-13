@@ -20,21 +20,17 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-/*
- * This is an example of a more complex path to really test the tuning.
- */
-
 @Config
 @Autonomous(name="--WIP-- Left")
 public class AutoLeftV2 extends LinearOpMode {
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
 
-    public static Pose2d START_POSITION = new Pose2d(-39.875, -61.75, -Math.PI/2);
-    public static int LOAD_HEIGHT = 1280;
+    public static Pose2d START_POSITION = new Pose2d(-39, -61.5, -Math.PI/2);
+    public static int LOAD_HEIGHT = 1300;
 
-    public static int PRELOAD_HEIGHT = 930;
-    public static int FIRST_PICKUP = 720;
+    public static int PRELOAD_HEIGHT = 940;
+    public static int FIRST_PICKUP = 715;
     public static int CONE_REDUCE_CONSTANT = 170;
     int highestConePos = FIRST_PICKUP;
 
@@ -64,6 +60,7 @@ public class AutoLeftV2 extends LinearOpMode {
 
         HardwareRagnarok robot = new HardwareRagnarok();
         robot.init(hardwareMap);
+        robot.moveWrist(true);
 
         robot.towersPositionMode();
 
@@ -165,7 +162,7 @@ public class AutoLeftV2 extends LinearOpMode {
         //PUT AUTON CODE HERE (DRIVER PRESSED THE PLAY BUTTON!)
 
         robot.moveClaw(true);
-        robot.moveWrist(false);
+        robot.moveWrist(true);
         robot.moveTwists(false);
         robot.moveGuide(false);
         robot.setTowerTarget(5);
@@ -174,12 +171,13 @@ public class AutoLeftV2 extends LinearOpMode {
         if (isStopRequested()) return;
 
 
-        Pose2d prepStrafePose = new Pose2d(-36, -54, Math.PI);
-        Pose2d almostLoadPose = new Pose2d(-56, -12, Math.PI);
-        Pose2d loadPose = new Pose2d(-61.5, -12, Math.PI);
-        Pose2d pathingPose1 = new Pose2d(-44,-12,Math.PI);
-        Pose2d midPreloadPrepPose = new Pose2d(-34,-24, Math.PI);
+        Pose2d strafeNode1 = new Pose2d(-37, -60, -Math.PI/2);
+        Pose2d strafeNode2 = new Pose2d(-36, -52.5, Math.PI);
+        Pose2d midPreloadPrepPose = new Pose2d(-34,-25, Math.PI);
         Pose2d midPreloadPose = new Pose2d(-30, -24, Math.PI);
+        Pose2d almostLoadPose = new Pose2d(-56, -13, Math.PI);
+        Pose2d loadPose = new Pose2d(-61.5, -12, Math.PI);
+        Pose2d pathingPose1 = new Pose2d(-42,-12, Math.PI);
         Pose2d midScorePose = new Pose2d(-24 - 6 * Math.sqrt(3)/2, -24 + 6/2, Math.PI * 5/6);
         Pose2d prepPark = new Pose2d(-36, -12, Math.PI/2);
         Pose2d park1Pose = new Pose2d(-58, -18, Math.PI/2);
@@ -188,15 +186,16 @@ public class AutoLeftV2 extends LinearOpMode {
 
         TrajectorySequence scorePreloadTrajSeq = drive.trajectorySequenceBuilder(START_POSITION)
                 .addTemporalMarker(0.5, ()->{
-                    robot.setTowerTarget(PRELOAD_HEIGHT);
+                    robot.setTowerTarget(LOAD_HEIGHT+50);
                     telemetry.addData("tower target", robot.leftTower.getTargetPosition());
                     telemetry.update();
                     robot.moveTowers(1);
                     robot.moveTwists(true);
                 })
-                .setTangent(Math.PI/4)
-                .splineToSplineHeading(prepStrafePose, Math.PI/2)
-                .splineToSplineHeading(midPreloadPrepPose, Math.PI/3)
+                .setTangent(Math.PI / 4)
+                .splineToConstantHeading(getVec(strafeNode1), Math.PI / 2)
+                .splineToSplineHeading(strafeNode2, Math.PI / 2)
+                .splineToSplineHeading(midPreloadPrepPose, Math.PI / 3)
                 .addTemporalMarker(()->{
                     robot.moveGuide(true);
                 })
@@ -210,6 +209,7 @@ public class AutoLeftV2 extends LinearOpMode {
                 .waitSeconds(0.2)
                 .addTemporalMarker(()->{
                     robot.moveTwists(false);
+                    robot.moveWrist(false);
                     robot.setTowerTarget(getConeHeight());
                 })
                 .build();
@@ -225,19 +225,22 @@ public class AutoLeftV2 extends LinearOpMode {
                     robot.moveClaw(true);
                     robot.moveGuide(false);
                 })
-                .waitSeconds(0.05)
+                .waitSeconds(0.1)
                 .addTemporalMarker(()->{
                     robot.setTowerTarget(LOAD_HEIGHT);
+                    robot.moveTowers(1);
                 })
-                .waitSeconds(0.3)
+                .waitSeconds(0.5)
                 .addTemporalMarker(()->{
-                    robot.moveTwists(true);
                     robot.moveWrist(true);
-                    robot.moveGuide(true);
                 })
                 .build();
 
         TrajectorySequence scoreMidTrajSeq = drive.trajectorySequenceBuilder(loadPose)
+                .addTemporalMarker(()->{
+                    robot.moveTwists(true);
+                    robot.moveGuide(true);
+                })
                 .setTangent(0)
                 .splineToSplineHeading(midScorePose, -Math.PI/6)
                 .addTemporalMarker(()->{
@@ -265,12 +268,11 @@ public class AutoLeftV2 extends LinearOpMode {
                 .waitSeconds(0.1)
                 .addTemporalMarker(()->{
                     robot.setTowerTarget(LOAD_HEIGHT);
+                    robot.moveTowers(1);
                 })
-                .waitSeconds(0.3)
+                .waitSeconds(0.5)
                 .addTemporalMarker(()->{
-                    robot.moveTwists(true);
                     robot.moveWrist(true);
-                    robot.moveGuide(true);
                 })
                 .build();
 

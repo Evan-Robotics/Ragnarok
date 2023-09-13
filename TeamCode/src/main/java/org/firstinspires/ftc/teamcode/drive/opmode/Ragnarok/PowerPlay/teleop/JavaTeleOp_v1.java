@@ -53,6 +53,9 @@ public class JavaTeleOp_v1 extends LinearOpMode {
     boolean goingDown = false;
     boolean gp2_x_last_frame = false;
 
+    boolean guideState = false;
+    boolean gp2_y_last_frame = false;
+
     boolean sensorLastFrame = false;
 
     private Mode currentMode = Mode.NORMAL_CONTROL;
@@ -151,10 +154,10 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             }
             sensorLastFrame = withinDistance;
 
-            if (flagAnimationTimer.seconds() <= 5 && withinDistance) {
-                robot.flag.setPosition((Math.floor(flagAnimationTimer.seconds() * 6 + 1) % 2) * .2 + .2);
+            if (flagAnimationTimer.seconds() <= 5 && flagAnimationTimer.seconds() > 0.2 && withinDistance) {
+                robot.flag.setPosition((Math.floor(flagAnimationTimer.seconds() * 6 + 1) % 2) * .3 + .2);
             } else {
-                robot.moveFlag(withinDistance);
+                robot.moveFlag(flagAnimationTimer.seconds() > 0.2 && withinDistance);
             }
 
             double verticalSpeedGravityFactor = towerHeight - robot.leftTower.getCurrentPosition() < 0 ? 0.5 : 1;
@@ -172,6 +175,12 @@ public class JavaTeleOp_v1 extends LinearOpMode {
 //            }
 //            gp2_a_last_frame = gamepad2.a;
 
+            if (gamepad2.y && !gp2_y_last_frame) {
+                guideState = !guideState;
+            }
+            gp2_y_last_frame = gamepad2.y;
+            robot.moveGuide(guideState);
+
             clawPos = distance <= robot.CLOSE_DISTANCE_MM && !gamepad2.a;
 
             if (gamepad2.x && !gp2_x_last_frame) {
@@ -184,6 +193,7 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             robot.moveClaw(clawPos);
 //            robot.moveGuide(clawPos && flipState);
 //            robot.moveFlag(distance <= robot.CLOSE_DISTANCE_MM);
+//            robot.moveGuide(false);
 
             ly = -gamepad1.left_stick_y;
             lx = -gamepad1.left_stick_x;

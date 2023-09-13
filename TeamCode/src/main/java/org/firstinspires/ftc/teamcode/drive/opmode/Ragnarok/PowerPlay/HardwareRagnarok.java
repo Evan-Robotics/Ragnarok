@@ -47,27 +47,27 @@ public class HardwareRagnarok {
     public Servo leftTwist = null;
     public Servo rightTwist= null;
 
-    public static double TWIST_POS_1 = 0.87;
-    public static double TWIST_POS_2 = 0.2;
+    public static double TWIST_POS_1 = 0.02;
+    public static double TWIST_POS_2 = 0.68;
 
     public Servo wrist = null;
-    public static double WRIST_POS_1 = 0.722;
-    public static double WRIST_POS_2 = 0.04;
+    public static double WRIST_POS_1 = 0.97;
+    public static double WRIST_POS_2 = 0.32;
 
     public Servo claw = null;
-    public static double CLAW_POS_1 = 0.18;
+    public static double CLAW_POS_1 = 0.14;
     public static double CLAW_POS_2 = 0.3;
 
     public Servo guide = null;
     public static double GUIDE_POS_1 = 0.05;
-    public static double GUIDE_POS_2 = 0.48;
+    public static double GUIDE_POS_2 = 0.32;
 
     public Servo flag = null;
     public static double FLAG_POS_1 = 0;
     public static double FLAG_POS_2 = 0.35;
 
     public RevColorSensorV3 sensor = null;
-    public static double CLOSE_DISTANCE_MM = 12;
+    public static double CLOSE_DISTANCE_MM = 16;
 
 
     /* local OpMode members. */
@@ -85,9 +85,9 @@ public class HardwareRagnarok {
 
         // Define and Initialize Motors
         leftTower = ahwMap.get(DcMotorEx.class, "LEFT TOWER");
-        leftTower.setDirection(DcMotorEx.Direction.REVERSE);
+        leftTower.setDirection(DcMotorEx.Direction.FORWARD);
         rightTower = ahwMap.get(DcMotorEx.class, "RIGHT TOWER");
-        rightTower.setDirection(DcMotorEx.Direction.FORWARD);
+        rightTower.setDirection(DcMotorEx.Direction.REVERSE);
 
         // Set all motors to zero power
         leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -122,7 +122,7 @@ public class HardwareRagnarok {
         guide.setPosition(GUIDE_POS_1);
 
         flag = ahwMap.get(Servo.class, "FLAG");
-        flag.setDirection(Servo.Direction.FORWARD);
+        flag.setDirection(Servo.Direction.REVERSE);
         flag.setPosition(FLAG_POS_1);
 
         sensor = ahwMap.get(RevColorSensorV3.class, "SENSOR");
