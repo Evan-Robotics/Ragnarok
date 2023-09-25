@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.teleop;
+package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
