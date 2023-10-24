@@ -8,13 +8,13 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-public class OpenCVMaster {
+public class BlueOpenCVMaster {
     private OpenCvWebcam webcam;
 
     private String itemStatus;
-    public CustomOpenCVPipeline opencv = null;
+    public BluePropOpenCVPipeline opencv = null;
     private LinearOpMode op;
-    public OpenCVMaster(LinearOpMode p_op){
+    public BlueOpenCVMaster(LinearOpMode p_op){
         //you can input  a hardwareMap instead of linearOpMode if you want
         op = p_op;
         //initialize webcam
@@ -25,7 +25,7 @@ public class OpenCVMaster {
     }
     public void observeStick(){
         //create the pipeline
-        opencv = new CustomOpenCVPipeline();
+        opencv = new BluePropOpenCVPipeline();
 
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {

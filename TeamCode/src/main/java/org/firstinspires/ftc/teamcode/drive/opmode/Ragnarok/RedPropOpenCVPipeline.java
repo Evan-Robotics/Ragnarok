@@ -11,7 +11,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomOpenCVPipeline extends OpenCvPipeline {
+public class RedPropOpenCVPipeline extends OpenCvPipeline {
     //backlog of frames to average out to reduce noise
 
     public String whichSide;
@@ -24,7 +24,7 @@ public class CustomOpenCVPipeline extends OpenCvPipeline {
     public static double strictLowS = 140;
     public static double strictHighS = 255;
 
-    public CustomOpenCVPipeline() {
+    public RedPropOpenCVPipeline() {
         frameList = new ArrayList<>();
     }
 
@@ -109,7 +109,7 @@ public class CustomOpenCVPipeline extends OpenCvPipeline {
 //        Scalar strictLowHSV = new Scalar(0, 100, 100);
 //        Scalar strictHighHSV = new Scalar(0, 255, 255);
         Scalar strictLowHSV = new Scalar(0, 100, 100);
-        Scalar strictHighHSV = new Scalar(0, 255, 255);
+        Scalar strictHighHSV = new Scalar(20, 255, 255);
 
 
         //apply strict HSV filter onto scaledMask to get rid of any yellow other than pole
@@ -118,10 +118,6 @@ public class CustomOpenCVPipeline extends OpenCvPipeline {
         Mat finalMask = new Mat();
         //color in scaledThresh with HSV, output into finalMask(only useful for showing result)(you can delete)
         Core.bitwise_and(mat, mat, finalMask, scaledThresh);
-
-        Mat edges = new Mat();
-        //detect edges(only useful for showing result)(you can delete)
-        Imgproc.Canny(scaledThresh, edges, 100, 200);
 
         //contours, apply post processing to information
         List<MatOfPoint> contours = new ArrayList<>();
@@ -142,7 +138,6 @@ public class CustomOpenCVPipeline extends OpenCvPipeline {
         scaledMask.release();
         mat.release();
         masked.release();
-        edges.release();
         thresh.release();
         finalMask.release();
 
@@ -185,9 +180,6 @@ public class CustomOpenCVPipeline extends OpenCvPipeline {
             whichSide = "right";
         }
 
-
-
-        //whichSide = "lol"+avg2;
 
         hasProcessedFrame = true;
 
