@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.teleop;
+package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.teleop;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
@@ -7,7 +7,6 @@ import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -15,13 +14,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.HardwareRagnarok;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PoseStorage;
+import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.HardwareRagnarok;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
-@TeleOp(name = "--MAIN-- Java TeleOp", group = "-main")
-@Disabled
-public class JavaTeleOp_v1 extends LinearOpMode {
+@TeleOp(name = "--MAIN-- Java TeleOp")
+public class MainTeleOpv1 extends LinearOpMode {
 
     // Driving variables
     enum Mode {
@@ -39,7 +37,7 @@ public class JavaTeleOp_v1 extends LinearOpMode {
     private double bound(double min, double val, double max) {
         return Math.min(Math.max( min, val), max);
     }
-    double f(double d) {return MIN_FACTOR-MAX_FACTOR/(FACTOR_POINT_2 - FACTOR_POINT_1) * (d - FACTOR_POINT_1) + MIN_FACTOR;}
+    double f(double d) {return (MIN_FACTOR-MAX_FACTOR)/(FACTOR_POINT_2 - FACTOR_POINT_1) * (d - FACTOR_POINT_1) + MIN_FACTOR;}
 
     double speedChange1;
     double speedChange2;
@@ -63,11 +61,8 @@ public class JavaTeleOp_v1 extends LinearOpMode {
     private Mode currentMode = Mode.NORMAL_CONTROL;
     private PIDFController headingController = new PIDFController(SampleMecanumDrive.HEADING_PID);
 
-    //Target Position of Storage Unit
-    private Vector2d storage_pos = new Vector2d(-66, 37);
-
     //Timers
-    private final ElapsedTime flagAnimationTimer = new ElapsedTime();
+    private final ElapsedTime bucketDepositTimer = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -121,17 +116,16 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             }
 
 
-
             if (gamepad2.left_bumper) {
                 speedChange2 = 0.5;
-            } else if (gamepad1.right_bumper) {
+            } else if (gamepad2.right_bumper) {
                 speedChange2 = 1.5;
             } else {
                 speedChange2 = 0.7;
             }
 
             towerHeight += TOWER_SPEED_FACTOR * -gamepad2.left_stick_y * speedChange2;
-            towerHeight = (int) bound(5, towerHeight, 2350);
+            towerHeight = (int) bound(5, towerHeight, MAX_TOWER_HEIGHT * 0.8);
 
             if (gamepad2.dpad_up) {
                 towerHeight = 2350;
@@ -141,25 +135,6 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             }
             if (gamepad2.dpad_down) {
                 towerHeight = 5;
-                flipState = false;
-//                goingDown = true;
-            }
-//            if (robot.leftTower.getCurrentPosition() <= 10) {
-//                goingDown = false;
-//            }
-
-            double distance = robot.sensor.getDistance(DistanceUnit.MM);
-            boolean withinDistance = distance <= robot.CLOSE_DISTANCE_MM;
-
-            if (!sensorLastFrame && withinDistance) {
-                flagAnimationTimer.reset();
-            }
-            sensorLastFrame = withinDistance;
-
-            if (flagAnimationTimer.seconds() <= 5 && flagAnimationTimer.seconds() > 0.2 && withinDistance) {
-                robot.flag.setPosition((Math.floor(flagAnimationTimer.seconds() * 6 + 1) % 2) * .3 + .2);
-            } else {
-                robot.moveFlag(flagAnimationTimer.seconds() > 0.2 && withinDistance);
             }
 
             double verticalSpeedGravityFactor = towerHeight - robot.leftTower.getCurrentPosition() < 0 ? 0.5 : 1;
@@ -172,30 +147,13 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             robot.leftTower.setPower(speedChange2 * verticalSpeedGravityFactor * verticalSpeedDistanceFactor);
             robot.rightTower.setPower(speedChange2 * verticalSpeedGravityFactor * verticalSpeedDistanceFactor);
 
-//            if (gamepad2.a && !gp2_a_last_frame) {
-//                clawPos = !clawPos;
-//            }
-//            gp2_a_last_frame = gamepad2.a;
-
-            if (gamepad2.y && !gp2_y_last_frame) {
-                guideState = !guideState;
-            }
-            gp2_y_last_frame = gamepad2.y;
-            robot.moveGuide(guideState);
-
-            clawPos = distance <= robot.CLOSE_DISTANCE_MM && !gamepad2.a;
 
             if (gamepad2.x && !gp2_x_last_frame) {
                 flipState = !flipState;
             }
             gp2_x_last_frame = gamepad2.x;
 
-            robot.moveTwists(flipState);
-            robot.moveWrist(flipState && !gamepad2.b);
-            robot.moveClaw(clawPos);
-//            robot.moveGuide(clawPos && flipState);
-//            robot.moveFlag(distance <= robot.CLOSE_DISTANCE_MM);
-//            robot.moveGuide(false);
+            robot.moveArm(flipState);
 
             ly = -gamepad1.left_stick_y;
             lx = -gamepad1.left_stick_x;
@@ -236,9 +194,4 @@ public class JavaTeleOp_v1 extends LinearOpMode {
             telemetry.update();
         }
     }
-
-    private static double[] hToServoPos(int h) {
-        return new double[2];
-    }
-
 }

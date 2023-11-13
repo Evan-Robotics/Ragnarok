@@ -64,7 +64,7 @@ public class BasicDrive extends LinearOpMode {
 
                 case "pov": {
                     int strafeDirection = 1; // negative or positive
-                    int turnDirection = -1; // neg or pos
+                    int turnDirection = 1; // neg or pos
                     double moveSpeed = -gamepad1.left_stick_y;
                     double turnSpeed = turnDirection * gamepad1.right_stick_x;
                     double strafeSpeed = strafeDirection * gamepad1.left_stick_x;
