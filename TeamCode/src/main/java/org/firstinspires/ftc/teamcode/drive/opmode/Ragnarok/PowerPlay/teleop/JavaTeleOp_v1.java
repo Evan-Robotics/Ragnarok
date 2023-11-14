@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PowerPlay.HardwareRa
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PoseStorage;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
-@TeleOp(name = "--MAIN-- Java TeleOp", group = "-main")
+@TeleOp(name = "Java TeleOp", group = "-main")
 @Disabled
 public class JavaTeleOp_v1 extends LinearOpMode {
 

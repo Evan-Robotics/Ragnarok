@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PoseStorage;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.HardwareRagnarok;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
-@TeleOp(name = "--MAIN-- Java TeleOp")
+@TeleOp(name = "--MAIN-- TeleOp")
 public class MainTeleOpv1 extends LinearOpMode {
 
     // Driving variables
