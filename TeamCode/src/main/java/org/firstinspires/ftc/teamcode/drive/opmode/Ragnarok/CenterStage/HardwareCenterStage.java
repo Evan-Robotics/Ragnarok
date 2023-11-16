@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -40,7 +39,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
-public class HardwareRagnarok {
+public class HardwareCenterStage {
     /* Public OpMode members. */
     public DcMotorEx leftTower = null;
     public DcMotorEx rightTower = null;
@@ -49,25 +48,25 @@ public class HardwareRagnarok {
     public Servo leftArm  = null;
     public Servo rightArm = null;
 
-    public static double ARM_POS_1 = 0;
-    public static double ARM_POS_2 = 1;
+    public static double ARM_POS_1 = 0.02;
+    public static double ARM_POS_2 = 0.6;
 
     public CRServo bucket = null;
 
-    public Servo leftDrop = null;
-    public Servo rightDrop = null;
-
-    public static double DROP_POS_1 = 0;
-    public static double DROP_POS_2 = 1;
-
-    public RevColorSensorV3 sensor = null;
+//    public Servo leftDrop = null;
+//    public Servo rightDrop = null;
+//
+//    public static double DROP_POS_1 = 0;
+//    public static double DROP_POS_2 = 1;
+//
+//    public RevColorSensorV3 sensor = null;
 
     /* local OpMode members. */
     HardwareMap hwMap           = null;
     private ElapsedTime period  = new ElapsedTime();
 
     /* Constructor */
-    public HardwareRagnarok(){
+    public HardwareCenterStage(){
 
     }
 
@@ -86,7 +85,7 @@ public class HardwareRagnarok {
         // Set all motors to zero power
         leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set all motors to run without encoders.
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -100,22 +99,22 @@ public class HardwareRagnarok {
         leftArm.setDirection(Servo.Direction.FORWARD);
         leftArm.setPosition(ARM_POS_1);
 
-        rightArm = ahwMap.get(Servo.class, "RIGHT TWIST");
+        rightArm = ahwMap.get(Servo.class, "RIGHT ARM");
         rightArm.setDirection(Servo.Direction.REVERSE);
         rightArm.setPosition(ARM_POS_1);
 
         bucket = ahwMap.get(CRServo.class, "BUCKET");
-        bucket.setDirection(DcMotorSimple.Direction.FORWARD);
+        bucket.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        leftDrop = ahwMap.get(Servo.class, "LEFT DROP");
-        leftDrop.setDirection(Servo.Direction.FORWARD);
-        leftDrop.setPosition(DROP_POS_1);
-
-        rightDrop = ahwMap.get(Servo.class, "RIGHT DROP");
-        rightDrop.setDirection(Servo.Direction.REVERSE);
-        rightDrop.setPosition(DROP_POS_1);
-
-        sensor = ahwMap.get(RevColorSensorV3.class, "SENSOR");
+//        leftDrop = ahwMap.get(Servo.class, "LEFT DROP");
+//        leftDrop.setDirection(Servo.Direction.FORWARD);
+//        leftDrop.setPosition(DROP_POS_1);
+//
+//        rightDrop = ahwMap.get(Servo.class, "RIGHT DROP");
+//        rightDrop.setDirection(Servo.Direction.REVERSE);
+//        rightDrop.setPosition(DROP_POS_1);
+//
+//        sensor = ahwMap.get(RevColorSensorV3.class, "SENSOR");
     }
 
     public void towersPositionMode() {
@@ -144,12 +143,17 @@ public class HardwareRagnarok {
         rightArm.setPosition(pos ? ARM_POS_2 : ARM_POS_1);
     }
 
+    public void setArmPosition(double pos) {
+        leftArm .setPosition(pos);
+        rightArm.setPosition(pos);
+    }
+
     public void moveBucket(double power) {
         bucket.setPower(power);
     }
 
-    public void moveDrop(boolean pos) {
-        leftDrop .setPosition(pos ? DROP_POS_2 : DROP_POS_1);
-        rightDrop.setPosition(pos ? DROP_POS_2 : DROP_POS_1);
-    }
+//    public void moveDrop(boolean pos) {
+//        leftDrop .setPosition(pos ? DROP_POS_2 : DROP_POS_1);
+//        rightDrop.setPosition(pos ? DROP_POS_2 : DROP_POS_1);
+//    }
 }
