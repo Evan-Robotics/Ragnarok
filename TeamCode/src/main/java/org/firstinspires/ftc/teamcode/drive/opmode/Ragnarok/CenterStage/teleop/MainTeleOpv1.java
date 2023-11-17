@@ -149,7 +149,7 @@ public class MainTeleOpv1 extends LinearOpMode {
                 robot.leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 robot.leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             }
-            robot.moveIntake(gamepad2.x ? (gamepad2.left_bumper ? -1 : 1) : 0);
+            robot.moveIntake(gamepad2.x ? (gamepad2.left_bumper ? -0.5 : 1) : 0);
 
             if (gamepad2.y && !gp2_y_last_frame) {
                 flipState = !flipState;

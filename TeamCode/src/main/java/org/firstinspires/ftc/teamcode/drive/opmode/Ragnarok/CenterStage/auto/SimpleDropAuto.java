@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.HardwareCenterStage;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name="Simple Drop Auto")
+@Autonomous(name="Simple Drop Auto", preselectTeleOp = "--MAIN-- TeleOp")
 public class SimpleDropAuto extends LinearOpMode {
 
     public static double BOT_LENGTH = 17.5;

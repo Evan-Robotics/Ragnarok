@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.HardwareCenterStage;
 
-@Autonomous(name="Just Go Forward")
+@Autonomous(name = "Just Go Forward", preselectTeleOp = "--MAIN-- TeleOp")
 public class JustGoForward extends LinearOpMode {
 
     public static double BOT_LENGTH = 17.5;
@@ -35,7 +35,6 @@ public class JustGoForward extends LinearOpMode {
         Trajectory place1 = drive.trajectoryBuilder(START_POSITION)
                 .forward(70/3*2-BOT_LENGTH)
                 .build();
-
 
         drive.followTrajectory(place1);
     }
