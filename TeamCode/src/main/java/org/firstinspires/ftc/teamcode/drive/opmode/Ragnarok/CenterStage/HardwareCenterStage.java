@@ -44,6 +44,7 @@ public class HardwareCenterStage {
     public DcMotorEx leftTower = null;
     public DcMotorEx rightTower = null;
     public DcMotorEx intake = null;
+    public DcMotorEx winch = null;
 
     public Servo leftArm  = null;
     public Servo rightArm = null;
@@ -52,6 +53,8 @@ public class HardwareCenterStage {
     public static double ARM_POS_2 = 0.6;
 
     public CRServo bucket = null;
+    public CRServo mysteryNumber3 = null;
+    public CRServo kick = null;
 
 //    public Servo leftDrop = null;
 //    public Servo rightDrop = null;
@@ -80,15 +83,19 @@ public class HardwareCenterStage {
         rightTower = ahwMap.get(DcMotorEx.class, "RIGHT TOWER");
         rightTower.setDirection(DcMotorEx.Direction.REVERSE);
         intake = ahwMap.get(DcMotorEx.class, "INTAKE");
-        intake.setDirection(DcMotorSimple.Direction.FORWARD);
+        intake.setDirection(DcMotor.Direction.FORWARD);
+        winch = ahwMap.get(DcMotorEx.class, "WINCH");
+        winch.setDirection(DcMotor.Direction.FORWARD);
 
         // Set all motors to zero power
         leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        winch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set all motors to run without encoders.
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        winch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // May want to use RUN_USING_ENCODERS if encoders are installed.
         leftTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -104,7 +111,13 @@ public class HardwareCenterStage {
         rightArm.setPosition(ARM_POS_1);
 
         bucket = ahwMap.get(CRServo.class, "BUCKET");
-        bucket.setDirection(DcMotorSimple.Direction.REVERSE);
+        bucket.setDirection(CRServo.Direction.REVERSE);
+
+        mysteryNumber3 = ahwMap.get(CRServo.class, "MYSTERY NUMBER 3");
+        mysteryNumber3.setDirection(CRServo.Direction.FORWARD);
+
+        kick = ahwMap.get(CRServo.class, "KICK");
+        kick.setDirection(CRServo.Direction.FORWARD);
 
 //        leftDrop = ahwMap.get(Servo.class, "LEFT DROP");
 //        leftDrop.setDirection(Servo.Direction.FORWARD);
@@ -136,6 +149,7 @@ public class HardwareCenterStage {
 
     public void moveIntake(double power) {
         intake.setPower(power);
+        kick.setPower(power);
     }
 
     public void moveArm(boolean pos) {
@@ -151,6 +165,9 @@ public class HardwareCenterStage {
     public void moveBucket(double power) {
         bucket.setPower(power);
     }
+
+    public void moveWinch(double power) { winch.setPower(power); }
+    public void moveMysteryNumber3(double power) { mysteryNumber3.setPower(power); }
 
 //    public void moveDrop(boolean pos) {
 //        leftDrop .setPosition(pos ? DROP_POS_2 : DROP_POS_1);

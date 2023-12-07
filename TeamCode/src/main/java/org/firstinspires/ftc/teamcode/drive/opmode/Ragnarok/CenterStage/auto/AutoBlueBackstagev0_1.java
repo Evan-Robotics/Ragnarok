@@ -9,8 +9,8 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.HardwareCenterStage;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name="v0.1 Auto Blue Boardside", preselectTeleOp = "--MAIN-- TeleOp")
-public class AutoBlueBoardsidev0_1 extends LinearOpMode {
+@Autonomous(name="v0.1 Auto Blue Backstage", preselectTeleOp = "--MAIN-- TeleOp")
+public class AutoBlueBackstagev0_1 extends LinearOpMode {
 
     public static double L = 17.5; // length of bot
     public static double W = 16.2; // width of bot

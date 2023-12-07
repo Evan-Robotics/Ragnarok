@@ -3,14 +3,16 @@ package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.auto;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.HardwareCenterStage;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name="v0.1 Auto Red Boardside", preselectTeleOp = "--MAIN-- TeleOp")
-public class AutoRedBoardsidev1_0 extends LinearOpMode {
+@Autonomous(name="v1.0 Auto Red Backstage", preselectTeleOp = "--MAIN-- TeleOp")
+@Disabled
+public class AutoRedBackstagev1_0 extends LinearOpMode {
 
     public static double L = 17.5; // length of bot
     public static double W = 16.2; // width of bot
@@ -31,8 +33,10 @@ public class AutoRedBoardsidev1_0 extends LinearOpMode {
         Pose2d spikeDrop1Node = new Pose2d(R*2/9,-R*7/9, -T/6);
         Pose2d spikeDrop1 = new Pose2d(L/4,-R/3 - 6 - W/4*SQRT3, -T/6);
         Pose2d spikeDrop2 = new Pose2d(R/3, R/3, 0);
+        Pose2d spikeDrop3 = new Pose2d(L/4 + R/3, -R/3 - 6 + W/4*SQRT3, T/6);
         Pose2d board1 = new Pose2d(R/3*2, -R/2+6, 0);
         Pose2d board2 = new Pose2d(R/3*2, -R/2, 0);
+        Pose2d board3 = new Pose2d(R/3*2, -R/2-6, 0);
 
         waitForStart();
 
@@ -47,7 +51,7 @@ public class AutoRedBoardsidev1_0 extends LinearOpMode {
                 .splineToLinearHeading(spikeDrop1, T/3)
                 .addTemporalMarker(()->{
                     robot.moveIntake(-1);
-                    robot.setTowerTarget(2350);
+                    robot.setTowerTarget(1290);
                     robot.moveTowers(1);
                     robot.moveArm(true);
                 })
@@ -64,7 +68,7 @@ public class AutoRedBoardsidev1_0 extends LinearOpMode {
                 .splineToLinearHeading(spikeDrop2, T/4)
                 .addTemporalMarker(()->{
                      robot.moveIntake(-1);
-                     robot.setTowerTarget(2350);
+                     robot.setTowerTarget(1290);
                      robot.towersPositionMode();
                      robot.moveTowers(1);
                      robot.moveArm(true);
@@ -77,11 +81,30 @@ public class AutoRedBoardsidev1_0 extends LinearOpMode {
                 })
                 .build();
 
-//        drive.followTrajectorySequence(place2);
-//        sleep(1000);
-//        robot.moveArm(false);
-//        robot.setTowerTarget(5);
-//        sleep(2000);
+        TrajectorySequence place3 = drive.trajectorySequenceBuilder(START_POSITION)
+                .splineToLinearHeading(spikeDrop3, T/6)
+                .addTemporalMarker(()->{
+                                robot.moveIntake(-1);
+                                robot.setTowerTarget(1290);
+                                robot.moveTowers(1);
+                                robot.moveArm(true);
+                })
+                .setTangent(-T/6)
+                .splineToLinearHeading(board3, 0)
+                .addTemporalMarker(()->{
+                                robot.moveIntake(0);
+                                robot.moveBucket(-0.5);
+                })
+                .build();
+
+
+        drive.followTrajectorySequence(place2);
+        sleep(1000);
+        robot.moveArm(false);
+        robot.setTowerTarget(5);
+        while (robot.rightTower.isBusy() || robot.leftTower.isBusy()) {
+            sleep(500);
+        }
     }
 
     static Vector2d getVec(Pose2d pose) {
