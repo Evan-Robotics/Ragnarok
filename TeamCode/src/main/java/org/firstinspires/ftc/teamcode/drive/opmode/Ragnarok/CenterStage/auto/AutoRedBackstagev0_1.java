@@ -34,6 +34,7 @@ public class AutoRedBackstagev0_1 extends LinearOpMode {
 
         if (isStopRequested()) return;
         sleep(100);
+        robot.towersPositionMode();
 
         TrajectorySequence place2 = drive.trajectorySequenceBuilder(START_POSITION)
                 .setTangent(T/4)
@@ -41,7 +42,6 @@ public class AutoRedBackstagev0_1 extends LinearOpMode {
                 .addTemporalMarker(()->{
                      robot.moveIntake(-1);
                      robot.setTowerTarget(2350);
-                     robot.towersPositionMode();
                      robot.moveTowers(1);
                      robot.moveArm(true);
                 })

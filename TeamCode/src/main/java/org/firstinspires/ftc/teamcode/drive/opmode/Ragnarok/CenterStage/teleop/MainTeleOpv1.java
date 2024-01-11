@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.teleop;
 
-import static org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.HardwareCenterStage.ARM_POS_1;
-import static org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.HardwareCenterStage.ARM_POS_2;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -46,9 +43,13 @@ public class MainTeleOpv1 extends LinearOpMode {
     int towerHeight = 0;
     int TOWER_SPEED_FACTOR = 50;
 
+    double launchArmAngle = 0;
+
     boolean flipState = false;
     boolean gp2_y_last_frame = false;
 
+    boolean triggerState = false;
+    boolean gp1_b_last_frame = false;
     private Mode currentMode = Mode.NORMAL_CONTROL;
     private PIDFController headingController = new PIDFController(SampleMecanumDrive.HEADING_PID);
 
@@ -151,6 +152,7 @@ public class MainTeleOpv1 extends LinearOpMode {
             }
             robot.moveIntake(gamepad2.x ? (gamepad2.left_bumper ? -0.5 : 1) : 0);
 
+
             if (gamepad2.y && !gp2_y_last_frame) {
                 flipState = !flipState;
             }
@@ -159,7 +161,18 @@ public class MainTeleOpv1 extends LinearOpMode {
             robot.moveArm(flipState);
 //            robot.setArmPosition(flipState ? ARM_POS_2 + gamepad2.right_trigger * 0.1 : ARM_POS_1);
 
-            robot.moveBucket(gamepad2.left_trigger != 0 ? (flipState ? -0.5 : 1) : 0);
+            robot.moveBucket(gamepad2.a ? (flipState ? -0.5 : 1) : 0);
+
+            if (gamepad1.b && !gp1_b_last_frame) {
+                triggerState = !triggerState;
+            }
+            gp1_b_last_frame = gamepad1.b;
+
+            robot.moveTrigger(triggerState);
+
+            launchArmAngle += (gamepad1.right_trigger - gamepad1.left_trigger)*0.01;
+            launchArmAngle = bound(0, launchArmAngle, 0.5);
+            robot.launchArm.setPosition(launchArmAngle);
 
             ly = -gamepad1.left_stick_y;
             lx = -gamepad1.left_stick_x;

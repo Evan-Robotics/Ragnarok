@@ -33,7 +33,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -49,12 +48,18 @@ public class HardwareCenterStage {
     public Servo leftArm  = null;
     public Servo rightArm = null;
 
-    public static double ARM_POS_1 = 0.02;
-    public static double ARM_POS_2 = 0.6;
+    public static double ARM_POS_1 = 0.01;
+    public static double ARM_POS_2 = 0.53;
 
     public CRServo bucket = null;
-    public CRServo mysteryNumber3 = null;
-    public CRServo kick = null;
+    public Servo launchArm = null;
+    public static double LAUNCH_ARM_POS_1 = 0;
+    public static double LAUNCH_ARM_POS_2 = 0.5;
+    public CRServo counterRoller = null;
+    public Servo trigger = null;
+    public static double TRIGGER_POS_1 = 0;
+    public static double TRIGGER_POS_2 = 1;
+
 
 //    public Servo leftDrop = null;
 //    public Servo rightDrop = null;
@@ -113,11 +118,14 @@ public class HardwareCenterStage {
         bucket = ahwMap.get(CRServo.class, "BUCKET");
         bucket.setDirection(CRServo.Direction.REVERSE);
 
-        mysteryNumber3 = ahwMap.get(CRServo.class, "MYSTERY NUMBER 3");
-        mysteryNumber3.setDirection(CRServo.Direction.FORWARD);
+        launchArm = ahwMap.get(Servo.class, "LAUNCH ARM");
+        launchArm.setDirection(Servo.Direction.FORWARD);
 
-        kick = ahwMap.get(CRServo.class, "KICK");
-        kick.setDirection(CRServo.Direction.FORWARD);
+        counterRoller = ahwMap.get(CRServo.class, "COUNTER ROLLER");
+        counterRoller.setDirection(CRServo.Direction.REVERSE);
+
+        trigger = ahwMap.get(Servo.class, "TRIGGER");
+        trigger.setDirection(Servo.Direction.REVERSE);
 
 //        leftDrop = ahwMap.get(Servo.class, "LEFT DROP");
 //        leftDrop.setDirection(Servo.Direction.FORWARD);
@@ -149,7 +157,7 @@ public class HardwareCenterStage {
 
     public void moveIntake(double power) {
         intake.setPower(power);
-        kick.setPower(power);
+        counterRoller.setPower(power);
     }
 
     public void moveArm(boolean pos) {
@@ -167,8 +175,12 @@ public class HardwareCenterStage {
     }
 
     public void moveWinch(double power) { winch.setPower(power); }
-    public void moveMysteryNumber3(double power) { mysteryNumber3.setPower(power); }
-
+    public void moveLaunchArm(boolean pos) {
+        trigger.setPosition(pos ? LAUNCH_ARM_POS_2 : LAUNCH_ARM_POS_1);
+    }
+    public void moveTrigger(boolean pos) {
+        trigger.setPosition(pos ? TRIGGER_POS_2 : TRIGGER_POS_1);
+    }
 //    public void moveDrop(boolean pos) {
 //        leftDrop .setPosition(pos ? DROP_POS_2 : DROP_POS_1);
 //        rightDrop.setPosition(pos ? DROP_POS_2 : DROP_POS_1);

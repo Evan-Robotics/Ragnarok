@@ -8,10 +8,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.HardwareCenterStage;
+import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.RedOpenCVMaster;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 @Autonomous(name="v1.0 Auto Red Backstage", preselectTeleOp = "--MAIN-- TeleOp")
-@Disabled
 public class AutoRedBackstagev1_0 extends LinearOpMode {
 
     public static double L = 17.5; // length of bot
@@ -31,16 +31,27 @@ public class AutoRedBackstagev1_0 extends LinearOpMode {
         robot.init(hardwareMap);
 
         Pose2d spikeDrop1Node = new Pose2d(R*2/9,-R*7/9, -T/6);
-        Pose2d spikeDrop1 = new Pose2d(L/4,-R/3 - 6 - W/4*SQRT3, -T/6);
-        Pose2d spikeDrop2 = new Pose2d(R/3, R/3, 0);
-        Pose2d spikeDrop3 = new Pose2d(L/4 + R/3, -R/3 - 6 + W/4*SQRT3, T/6);
-        Pose2d board1 = new Pose2d(R/3*2, -R/2+6, 0);
-        Pose2d board2 = new Pose2d(R/3*2, -R/2, 0);
-        Pose2d board3 = new Pose2d(R/3*2, -R/2-6, 0);
+        Pose2d spikeDrop1 = new Pose2d((L+2)/4,-R/3 - 6 - (W+2)/4*SQRT3, -T/6);
+        Pose2d spikeDrop2 = new Pose2d(R/3, -R/3, 0);
+        Pose2d spikeDrop3 = new Pose2d((L+2)/4 + R/3, -R/3 - 6 + (W+2)/4*SQRT3, T/6);
+        Pose2d board1 = new Pose2d(R/3*2+6, -R/2+7, 0);
+        Pose2d board2 = new Pose2d(R/3*2+6, -R/2, 0);
+        Pose2d board3 = new Pose2d(R/3*2+6, -R/2-7, 0);
 
-        waitForStart();
+        RedOpenCVMaster cv = new RedOpenCVMaster(this);
+        cv.observeStick();
+        int item = 2;
+        int max;
 
-        // PUT AUTON CODE HERE (DRIVER PRESSED THE PLAY BUTTON!)
+        while (!isStarted() && !isStopRequested()) {
+            max = cv.opencv.max;
+            if (cv.opencv.avg1 == max) { item = 3; }
+            if (cv.opencv.avg2 == max) { item = 2; }
+            if (cv.opencv.avg3 == max) { item = 1; }
+
+            telemetry.addData("Detecting", item);
+            telemetry.update();
+        }
 
         if (isStopRequested()) return;
         sleep(100);
@@ -50,10 +61,10 @@ public class AutoRedBackstagev1_0 extends LinearOpMode {
                 .splineToSplineHeading(spikeDrop1Node, T/4)
                 .splineToLinearHeading(spikeDrop1, T/3)
                 .addTemporalMarker(()->{
-                    robot.moveIntake(-1);
-                    robot.setTowerTarget(1290);
-                    robot.moveTowers(1);
-                    robot.moveArm(true);
+                    robot.moveIntake(-0.7);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.3, ()->{
+                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.02);
                 })
                 .setTangent(0)
                 .splineToLinearHeading(board1, 0)
@@ -67,11 +78,10 @@ public class AutoRedBackstagev1_0 extends LinearOpMode {
                 .setTangent(T/4)
                 .splineToLinearHeading(spikeDrop2, T/4)
                 .addTemporalMarker(()->{
-                     robot.moveIntake(-1);
-                     robot.setTowerTarget(1290);
-                     robot.towersPositionMode();
-                     robot.moveTowers(1);
-                     robot.moveArm(true);
+                    robot.moveIntake(-0.7);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.3, ()->{
+                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.02);
                 })
                 .setTangent(0)
                 .splineToConstantHeading(getVec(board2), 0)
@@ -84,27 +94,35 @@ public class AutoRedBackstagev1_0 extends LinearOpMode {
         TrajectorySequence place3 = drive.trajectorySequenceBuilder(START_POSITION)
                 .splineToLinearHeading(spikeDrop3, T/6)
                 .addTemporalMarker(()->{
-                                robot.moveIntake(-1);
-                                robot.setTowerTarget(1290);
-                                robot.moveTowers(1);
-                                robot.moveArm(true);
+                    robot.moveIntake(-0.7);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.3, ()->{
+                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.02);
                 })
                 .setTangent(-T/6)
                 .splineToLinearHeading(board3, 0)
                 .addTemporalMarker(()->{
-                                robot.moveIntake(0);
-                                robot.moveBucket(-0.5);
+                    robot.moveIntake(0);
+                    robot.moveBucket(-0.5);
                 })
                 .build();
 
-
-        drive.followTrajectorySequence(place2);
-        sleep(1000);
-        robot.moveArm(false);
-        robot.setTowerTarget(5);
-        while (robot.rightTower.isBusy() || robot.leftTower.isBusy()) {
-            sleep(500);
+        switch (item) {
+            case 1:
+                drive.followTrajectorySequence(place1);
+                break;
+            case 2:
+                drive.followTrajectorySequence(place2);
+                break;
+            case 3:
+                drive.followTrajectorySequence(place3);
         }
+        robot.moveIntake(1);
+        sleep(1000);
+        robot.moveIntake(0);
+        robot.moveBucket(0);
+        robot.moveArm(false);
+        sleep(2000);
     }
 
     static Vector2d getVec(Pose2d pose) {

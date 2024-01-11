@@ -50,24 +50,15 @@ public class RedPropDetectionTest extends LinearOpMode {
         RedOpenCVMaster cv = new RedOpenCVMaster(this);
 //      call the function to startStreaming
         cv.observeStick();
-        int left;
-        int right;
-        int center;
-        int item;
-//        telemetry.addLine(cv.getItemStatus());
-//        telemetry.addLine("lol");
+        int item = 2;
+        int max;
+
         waitForStart();
         while (opModeIsActive()) {
-            left = cv.opencv.avg1;
-            center = cv.opencv.avg2;
-            right = cv.opencv.avg3;
-            if (left > center && left >= right) {
-                item = 1;
-            } else if (center >= left && center >= right) {
-                item = 2;
-            } else {
-                item = 3;
-            }
+            max = cv.opencv.max;
+            if (cv.opencv.avg1 == max) { item = 3; }
+            if (cv.opencv.avg2 == max) { item = 2; }
+            if (cv.opencv.avg3 == max) { item = 1; }
 
             telemetry.addData("Item: ", item);
             telemetry.addData("Debug", cv.opencv.max);
