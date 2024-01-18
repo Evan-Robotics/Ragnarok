@@ -120,6 +120,7 @@ public class BluePropOpenCVPipeline extends OpenCvPipeline {
         region1_bw.release();
         region2_bw.release();
         region3_bw.release();
+        mask.release();
 
         // Find the region with the maximum blue pixels
         int maxOneTwo = Math.max(avg1, avg2);

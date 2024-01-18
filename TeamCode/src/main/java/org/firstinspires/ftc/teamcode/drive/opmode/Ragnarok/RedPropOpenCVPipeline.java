@@ -120,6 +120,7 @@ public class RedPropOpenCVPipeline extends OpenCvPipeline {
         region1_bw.release();
         region2_bw.release();
         region3_bw.release();
+        mask.release();
 
         // Find the region with the maximum red pixels
         int maxOneTwo = Math.max(avg1, avg2);

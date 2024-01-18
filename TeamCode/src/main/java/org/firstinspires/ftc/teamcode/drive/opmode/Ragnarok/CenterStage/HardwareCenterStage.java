@@ -42,6 +42,7 @@ public class HardwareCenterStage {
     /* Public OpMode members. */
     public DcMotorEx leftTower = null;
     public DcMotorEx rightTower = null;
+    public static final int MAX_TOWER_HEIGHT = 2300;
     public DcMotorEx intake = null;
     public DcMotorEx winch = null;
 
@@ -58,7 +59,7 @@ public class HardwareCenterStage {
     public CRServo counterRoller = null;
     public Servo trigger = null;
     public static double TRIGGER_POS_1 = 0;
-    public static double TRIGGER_POS_2 = 1;
+    public static double TRIGGER_POS_2 = 0.3;
 
 
 //    public Servo leftDrop = null;
@@ -151,8 +152,9 @@ public class HardwareCenterStage {
         rightTower.setPower(speed);
     }
     public void setTowerTarget(int targetPos) {
-        leftTower .setTargetPosition(targetPos);
-        rightTower.setTargetPosition(targetPos);
+        int x = Math.max(0, Math.min(targetPos, MAX_TOWER_HEIGHT));
+        leftTower .setTargetPosition(x);
+        rightTower.setTargetPosition(x);
     }
 
     public void moveIntake(double power) {

@@ -30,7 +30,6 @@ public class MainTeleOpv1 extends LinearOpMode {
     public static double MIN_FACTOR = 3.0;
     public static int FACTOR_POINT_1 = 10;
     public static int FACTOR_POINT_2 = 30;
-    int MAX_TOWER_HEIGHT = 3178;
 
     private double bound(double min, double val, double max) {
         return Math.min( Math.max(min, val), max);
@@ -41,7 +40,7 @@ public class MainTeleOpv1 extends LinearOpMode {
     double speedChange2;
 
     int towerHeight = 0;
-    int TOWER_SPEED_FACTOR = 50;
+    int TOWER_SPEED_FACTOR = 10;
 
     double launchArmAngle = 0;
 
@@ -50,6 +49,9 @@ public class MainTeleOpv1 extends LinearOpMode {
 
     boolean triggerState = false;
     boolean gp1_b_last_frame = false;
+
+    boolean launchState = false;
+    boolean gp1_y_last_frame = false;
     private Mode currentMode = Mode.NORMAL_CONTROL;
     private PIDFController headingController = new PIDFController(SampleMecanumDrive.HEADING_PID);
 
@@ -116,18 +118,18 @@ public class MainTeleOpv1 extends LinearOpMode {
                 speedChange2 = 0.7;
             }
 
-            if (!gamepad2.b) {
+            if (!(gamepad1.y && gamepad1.dpad_up)) {
                 robot.leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 robot.rightTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 towerHeight += TOWER_SPEED_FACTOR * -gamepad2.left_stick_y * speedChange2;
-                towerHeight = (int) bound(5, towerHeight, MAX_TOWER_HEIGHT * 0.8);
+                towerHeight = (int) bound(5, towerHeight, HardwareCenterStage.MAX_TOWER_HEIGHT * 0.9);
 
                 if (gamepad2.dpad_up) {
-                    towerHeight = 2350;
+                    towerHeight = (int) (HardwareCenterStage.MAX_TOWER_HEIGHT * 0.9);
                     flipState = true;
                 }
                 if (gamepad2.dpad_right) {
-                    towerHeight = 1290;
+                    towerHeight = (int) (HardwareCenterStage.MAX_TOWER_HEIGHT * 0.5);
                     flipState = true;
                 }
                 if (gamepad2.dpad_down) {
@@ -168,11 +170,15 @@ public class MainTeleOpv1 extends LinearOpMode {
             }
             gp1_b_last_frame = gamepad1.b;
 
-            robot.moveTrigger(triggerState);
+            if (gamepad1.y && !gp1_y_last_frame) {
+                launchState = !launchState;
+            }
+            gp1_y_last_frame = gamepad1.y;
+            robot.moveLaunchArm(launchState);
 
-            launchArmAngle += (gamepad1.right_trigger - gamepad1.left_trigger)*0.01;
-            launchArmAngle = bound(0, launchArmAngle, 0.5);
-            robot.launchArm.setPosition(launchArmAngle);
+//            launchArmAngle += (gamepad1.right_trigger - gamepad1.left_trigger)*0.01;
+//            launchArmAngle = bound(0, launchArmAngle, 0.5);
+//            robot.launchArm.setPosition(launchArmAngle);
 
             ly = -gamepad1.left_stick_y;
             lx = -gamepad1.left_stick_x;
@@ -186,9 +192,9 @@ public class MainTeleOpv1 extends LinearOpMode {
                     );
 
                     // Switch to tank if gamepad1 left dpad is activated
-                    if (gamepad1.dpad_left) {
-                        currentMode = Mode.GRID;
-                    }
+//                    if (gamepad1.dpad_left) {
+//                        currentMode = Mode.GRID;
+//                    }
 
 
             //Dashboard View
@@ -206,9 +212,9 @@ public class MainTeleOpv1 extends LinearOpMode {
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
             telemetry.addData("Target Tower Height", towerHeight);
-            telemetry.addData("gamepad2.left_stick_y", gamepad2.left_stick_y);
             telemetry.addData("Left Tower Height", robot.leftTower.getCurrentPosition());
             telemetry.addData("Right Tower Height", robot.rightTower.getCurrentPosition());
+            telemetry.addData("Launcher Height", launchArmAngle);
             // telemetry.addData("Tower Speeds", leftTowerSpeed + ", " + rightTowerSpeed);
             telemetry.update();
         }

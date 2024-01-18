@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.auto;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.Hardware
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 @Autonomous(name="v0.1 Auto Blue Backstage", preselectTeleOp = "--MAIN-- TeleOp")
+@Disabled
 public class AutoBlueBackstagev0_1 extends LinearOpMode {
 
     public static double L = 17.5; // length of bot

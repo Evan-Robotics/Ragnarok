@@ -34,9 +34,9 @@ public class AutoBlueBackstagev1_0 extends LinearOpMode {
         Pose2d spikeDrop2 = new Pose2d(R/3, R/3, 0);
         Pose2d spikeDrop3Node = new Pose2d(R*2/9,R*7/9, T/6);
         Pose2d spikeDrop3 = new Pose2d((L+2)/4,R/3 + 6 + (W+2)/4*SQRT3, T/6);
-        Pose2d board1 = new Pose2d(R/3*2+4, R/2+7, 0);
-        Pose2d board2 = new Pose2d(R/3*2+4, R/2, 0);
-        Pose2d board3 = new Pose2d(R/3*2+4, R/2-7, 0);
+        Pose2d board1 = new Pose2d(R/3*2+7, R/2+8, 0);
+        Pose2d board2 = new Pose2d(R/3*2+7, R/2, 0);
+        Pose2d board3 = new Pose2d(R/3*2+7, R/2-7, 0);
 
         BlueOpenCVMaster cv = new BlueOpenCVMaster(this);
         cv.observeStick();
