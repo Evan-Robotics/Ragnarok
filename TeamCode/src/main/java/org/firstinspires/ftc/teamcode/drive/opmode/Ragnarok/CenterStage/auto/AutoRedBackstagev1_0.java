@@ -47,9 +47,9 @@ public class AutoRedBackstagev1_0 extends LinearOpMode {
 
         while (!isStarted() && !isStopRequested()) {
             max = cv.opencv.max;
-            if (cv.opencv.avg1 == max) { item = 3; }
+            if (cv.opencv.avg1 == max) { item = 1; }
             if (cv.opencv.avg2 == max) { item = 2; }
-            if (cv.opencv.avg3 == max) { item = 1; }
+            if (cv.opencv.avg3 == max) { item = 3; }
 
             telemetry.addData("Detecting", item);
             telemetry.update();

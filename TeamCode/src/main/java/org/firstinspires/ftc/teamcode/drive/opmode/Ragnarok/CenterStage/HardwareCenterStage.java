@@ -42,9 +42,8 @@ public class HardwareCenterStage {
     /* Public OpMode members. */
     public DcMotorEx leftTower = null;
     public DcMotorEx rightTower = null;
-    public static final int MAX_TOWER_HEIGHT = 2300;
+    public static final int MAX_TOWER_HEIGHT = 4000;
     public DcMotorEx intake = null;
-    public DcMotorEx winch = null;
 
     public Servo leftArm  = null;
     public Servo rightArm = null;
@@ -55,20 +54,14 @@ public class HardwareCenterStage {
     public CRServo bucket = null;
     public Servo launchArm = null;
     public static double LAUNCH_ARM_POS_1 = 0;
-    public static double LAUNCH_ARM_POS_2 = 0.5;
+    public static double LAUNCH_ARM_POS_2 = 0.45;
     public CRServo counterRoller = null;
     public Servo trigger = null;
     public static double TRIGGER_POS_1 = 0;
     public static double TRIGGER_POS_2 = 0.3;
-
-
-//    public Servo leftDrop = null;
-//    public Servo rightDrop = null;
-//
-//    public static double DROP_POS_1 = 0;
-//    public static double DROP_POS_2 = 1;
-//
-//    public RevColorSensorV3 sensor = null;
+    public Servo liftIntake = null;
+    public static double LIFT_INTAKE_POS_1 = 0;
+    public static double LIFT_INTAKE_POS_2 = 1;
 
     /* local OpMode members. */
     HardwareMap hwMap           = null;
@@ -90,18 +83,14 @@ public class HardwareCenterStage {
         rightTower.setDirection(DcMotorEx.Direction.REVERSE);
         intake = ahwMap.get(DcMotorEx.class, "INTAKE");
         intake.setDirection(DcMotor.Direction.FORWARD);
-        winch = ahwMap.get(DcMotorEx.class, "WINCH");
-        winch.setDirection(DcMotor.Direction.FORWARD);
 
         // Set all motors to zero power
         leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        winch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set all motors to run without encoders.
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        winch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // May want to use RUN_USING_ENCODERS if encoders are installed.
         leftTower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -128,15 +117,9 @@ public class HardwareCenterStage {
         trigger = ahwMap.get(Servo.class, "TRIGGER");
         trigger.setDirection(Servo.Direction.REVERSE);
 
-//        leftDrop = ahwMap.get(Servo.class, "LEFT DROP");
-//        leftDrop.setDirection(Servo.Direction.FORWARD);
-//        leftDrop.setPosition(DROP_POS_1);
-//
-//        rightDrop = ahwMap.get(Servo.class, "RIGHT DROP");
-//        rightDrop.setDirection(Servo.Direction.REVERSE);
-//        rightDrop.setPosition(DROP_POS_1);
-//
-//        sensor = ahwMap.get(RevColorSensorV3.class, "SENSOR");
+        liftIntake = ahwMap.get(Servo.class, "LIFT INTAKE");
+        liftIntake.setDirection(Servo.Direction.REVERSE);
+        liftIntake.setPosition(LIFT_INTAKE_POS_2);
     }
 
     public void towersPositionMode() {
@@ -176,15 +159,10 @@ public class HardwareCenterStage {
         bucket.setPower(power);
     }
 
-    public void moveWinch(double power) { winch.setPower(power); }
     public void moveLaunchArm(boolean pos) {
-        trigger.setPosition(pos ? LAUNCH_ARM_POS_2 : LAUNCH_ARM_POS_1);
+        launchArm.setPosition(pos ? LAUNCH_ARM_POS_2 : LAUNCH_ARM_POS_1);
     }
     public void moveTrigger(boolean pos) {
         trigger.setPosition(pos ? TRIGGER_POS_2 : TRIGGER_POS_1);
     }
-//    public void moveDrop(boolean pos) {
-//        leftDrop .setPosition(pos ? DROP_POS_2 : DROP_POS_1);
-//        rightDrop.setPosition(pos ? DROP_POS_2 : DROP_POS_1);
-//    }
 }

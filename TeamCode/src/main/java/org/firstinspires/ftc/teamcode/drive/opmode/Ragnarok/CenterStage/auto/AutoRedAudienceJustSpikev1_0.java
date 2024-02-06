@@ -10,8 +10,8 @@ import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.Hardware
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.RedOpenCVMaster;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name="v1.0 Auto Red Audience", preselectTeleOp = "--MAIN-- TeleOp")
-public class AutoRedAudiencev1_0 extends LinearOpMode {
+@Autonomous(name="v1.0 Just Spike Auto Red Audience", preselectTeleOp = "--MAIN-- TeleOp")
+public class AutoRedAudienceJustSpikev1_0 extends LinearOpMode {
 
     public static double L = 17.5; // length of bot
     public static double W = 16.2; // width of bot
@@ -29,14 +29,12 @@ public class AutoRedAudiencev1_0 extends LinearOpMode {
         HardwareCenterStage robot = new HardwareCenterStage();
         robot.init(hardwareMap);
 
-        Pose2d spikeDrop1 = new Pose2d(-R*2/3 + L/4*SQRT3,-R/3 - 6 + L/4, T/12);
-        Pose2d spikeDrop2 = new Pose2d(-R/2 + L/4, -R/3 + L/4*SQRT3, T/6);
-        Pose2d spikeDrop3 = new Pose2d(-R/3 - L/2 - 2, -R/3 - 6, T/2 - 1e-6);
-        Pose2d pathNode1 = new Pose2d(-R/3, -R/6, 0);
-        Pose2d pathNode2 = new Pose2d(R/3, -R/6, 0);
-        Pose2d board1 = new Pose2d(R/3*2+9, -R/2+7, 0);
-        Pose2d board2 = new Pose2d(R/3*2+9, -R/2, 0);
-        Pose2d board3 = new Pose2d(R/3*2+9, -R/2-8, 0);
+        Pose2d spikeDrop1 = new Pose2d(-R*2/3,-R/2 - L/2 - 1, -T/4);
+        Pose2d spikeDrop2 = new Pose2d(-R*2/3-1, -R/3, -T/2);
+        Pose2d spikeDrop3 = new Pose2d(-(L+2)/4 - R/3,-R/3 - 6 - (W+2)/4*SQRT3, -T/2+T/6);
+        Pose2d notPark = new Pose2d(-R/2, -R*5/6, -T/4);
+        Pose2d pathNode = new Pose2d(-R/2+1, -R*5/6, T/2);
+        Pose2d park = new Pose2d(R*5/6, -R*5/6, T/2);
 
         RedOpenCVMaster cv = new RedOpenCVMaster(this);
         cv.observeStick();
@@ -57,59 +55,33 @@ public class AutoRedAudiencev1_0 extends LinearOpMode {
         sleep(100);
 
         TrajectorySequence place1 = drive.trajectorySequenceBuilder(START_POSITION)
-                .splineToLinearHeading(spikeDrop1, T/4)
+                .strafeTo(getVec(spikeDrop1))
+                .turn(T/2 - 1e-6)
+                .turn(0.02)
                 .addTemporalMarker(()->{
-                    robot.moveIntake(-0.7);
+                                robot.moveIntake(-0.7);
                 })
-                .addSpatialMarker(new Vector2d(R/6, 0), ()->{
-                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.02);
-                })
-                .setTangent(T/4)
-                .splineToSplineHeading(pathNode1, 0)
-                .strafeTo(getVec(pathNode2))
-                .splineToConstantHeading(getVec(board1), 0)
-                .addTemporalMarker(()->{
-                    robot.moveIntake(0);
-                    robot.moveBucket(-0.5);
-                })
+                .strafeTo(getVec(notPark))
                 .build();
 
         TrajectorySequence place2 = drive.trajectorySequenceBuilder(START_POSITION)
-                .setTangent(T/3)
-                .splineToLinearHeading(spikeDrop2, T/6)
+                .strafeTo(getVec(spikeDrop2))
+                .turn(T/4+T/60)
                 .addTemporalMarker(()->{
-                    robot.moveIntake(-0.7);
+                                robot.moveIntake(-0.7);
                 })
-                .addSpatialMarker(new Vector2d(R/6, 0), ()->{
-                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.02);
-                })
-                .setTangent(T/4)
-                .splineToSplineHeading(pathNode1, 0)
-                .strafeTo(getVec(pathNode2))
-                .splineToConstantHeading(getVec(board2), 0)
-                .addTemporalMarker(()->{
-                    robot.moveIntake(0);
-                    robot.moveBucket(-0.5);
-                })
+                .setTangent(T/2)
+                .splineToConstantHeading(getVec(notPark), -T/4)
                 .build();
 
         TrajectorySequence place3 = drive.trajectorySequenceBuilder(START_POSITION)
                 .forward(2)
                 .splineToLinearHeading(spikeDrop3, 0)
                 .addTemporalMarker(()->{
-                    robot.moveIntake(-0.7);
+                                robot.moveIntake(-0.7);
                 })
-                .addSpatialMarker(new Vector2d(R/6, 0), ()->{
-                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.02);
-                })
-                .setTangent(T/2)
-                .splineToSplineHeading(pathNode1, 0)
-                .strafeTo(getVec(pathNode2))
-                .splineToConstantHeading(getVec(board3), 0)
-                .addTemporalMarker(()->{
-                    robot.moveIntake(0);
-                    robot.moveBucket(-0.5);
-                })
+                .setTangent(-T/2)
+                .splineToLinearHeading(notPark, -T/4)
                 .build();
 
         switch (item) {
@@ -122,11 +94,14 @@ public class AutoRedAudiencev1_0 extends LinearOpMode {
             case 3:
                 drive.followTrajectorySequence(place3);
         }
-        robot.moveIntake(1);
         sleep(1000);
         robot.moveIntake(0);
-        robot.moveBucket(0);
-        robot.moveArm(false);
+        if (item == 1) {
+            drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                    .splineToLinearHeading(pathNode, 0)
+                    .strafeTo(getVec(park))
+                    .build());
+        }
         sleep(2000);
     }
 

@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.PoseStorage;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.HardwareCenterStage;
@@ -26,7 +27,7 @@ public class MainTeleOpv1 extends LinearOpMode {
         GRID          // testing
     }
 
-    public static double MAX_FACTOR = 20.0;
+    public static double MAX_FACTOR = 30.0;
     public static double MIN_FACTOR = 3.0;
     public static int FACTOR_POINT_1 = 10;
     public static int FACTOR_POINT_2 = 30;
@@ -40,7 +41,7 @@ public class MainTeleOpv1 extends LinearOpMode {
     double speedChange2;
 
     int towerHeight = 0;
-    int TOWER_SPEED_FACTOR = 10;
+    int TOWER_SPEED_FACTOR = 50;
 
     double launchArmAngle = 0;
 
@@ -52,11 +53,11 @@ public class MainTeleOpv1 extends LinearOpMode {
 
     boolean launchState = false;
     boolean gp1_y_last_frame = false;
+
     private Mode currentMode = Mode.NORMAL_CONTROL;
     private PIDFController headingController = new PIDFController(SampleMecanumDrive.HEADING_PID);
 
     //Timers
-    private final ElapsedTime bucketDepositTimer = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -65,6 +66,8 @@ public class MainTeleOpv1 extends LinearOpMode {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         HardwareCenterStage robot = new HardwareCenterStage();
         robot.init(hardwareMap);
+//        robot.leftTower.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        robot.rightTower.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.leftTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.rightTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -81,6 +84,8 @@ public class MainTeleOpv1 extends LinearOpMode {
 
         ////VARIABLES\\\\\
         if (isStopRequested()) return;
+
+        robot.towersPositionMode();
 
         while (opModeIsActive() && !isStopRequested()) {
 
@@ -118,9 +123,6 @@ public class MainTeleOpv1 extends LinearOpMode {
                 speedChange2 = 0.7;
             }
 
-            if (!(gamepad1.y && gamepad1.dpad_up)) {
-                robot.leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                robot.rightTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 towerHeight += TOWER_SPEED_FACTOR * -gamepad2.left_stick_y * speedChange2;
                 towerHeight = (int) bound(5, towerHeight, HardwareCenterStage.MAX_TOWER_HEIGHT * 0.9);
 
@@ -136,23 +138,23 @@ public class MainTeleOpv1 extends LinearOpMode {
                     towerHeight = 5;
                     flipState = false;
                 }
+                if (gamepad2.dpad_left) {
+                    towerHeight = 500;
+                    flipState = true;
+                }
 
                 double verticalSpeedGravityFactor = towerHeight - robot.leftTower.getCurrentPosition() < 0 ? 0.5 : 1;
                 double verticalSpeedDistanceFactor = bound(MIN_FACTOR, f(Math.abs(towerHeight - robot.leftTower.getCurrentPosition())), MAX_FACTOR);
 
                 robot.leftTower.setTargetPosition(towerHeight);
                 robot.rightTower.setTargetPosition(towerHeight);
-                robot.leftTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robot.rightTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robot.leftTower.setPower(speedChange2 * verticalSpeedGravityFactor * verticalSpeedDistanceFactor);
-                robot.rightTower.setPower(speedChange2 * verticalSpeedGravityFactor * verticalSpeedDistanceFactor);
-            } else {
-                robot.leftTower.setPower(0);
-                robot.leftTower.setPower(0);
-                robot.leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                robot.leftTower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            }
-            robot.moveIntake(gamepad2.x ? (gamepad2.left_bumper ? -0.5 : 1) : 0);
+                robot.moveTowers(speedChange2 * verticalSpeedGravityFactor * verticalSpeedDistanceFactor);
+
+//            robot.leftTower.setPower(-gamepad2.left_stick_y * speedChange2 * 0.67);
+//            robot.rightTower.setPower(-gamepad2.left_stick_y * speedChange2 * 0.67);
+
+
+            robot.moveIntake(gamepad2.x ? (gamepad2.left_bumper ? -0.65 : 1) : 0);
 
 
             if (gamepad2.y && !gp2_y_last_frame) {
@@ -160,15 +162,19 @@ public class MainTeleOpv1 extends LinearOpMode {
             }
             gp2_y_last_frame = gamepad2.y;
 
-            robot.moveArm(flipState);
-//            robot.setArmPosition(flipState ? ARM_POS_2 + gamepad2.right_trigger * 0.1 : ARM_POS_1);
+//            robot.moveArm(flipState);
+//            robot.setArmPosition(flipState ? HardwareCenterStage.ARM_POS_2 + 0.02 : HardwareCenterStage.ARM_POS_1);
+            robot.setArmPosition(flipState ? HardwareCenterStage.ARM_POS_2 + gamepad2.right_trigger * 0.0625 : HardwareCenterStage.ARM_POS_1);
 
             robot.moveBucket(gamepad2.a ? (flipState ? -0.5 : 1) : 0);
+
+            robot.liftIntake.setPosition(flipState ? HardwareCenterStage.LIFT_INTAKE_POS_2 : HardwareCenterStage.LIFT_INTAKE_POS_1 + gamepad2.right_trigger * (HardwareCenterStage.LIFT_INTAKE_POS_2 - HardwareCenterStage.LIFT_INTAKE_POS_1));
 
             if (gamepad1.b && !gp1_b_last_frame) {
                 triggerState = !triggerState;
             }
             gp1_b_last_frame = gamepad1.b;
+            robot.moveTrigger(triggerState);
 
             if (gamepad1.y && !gp1_y_last_frame) {
                 launchState = !launchState;
@@ -214,6 +220,10 @@ public class MainTeleOpv1 extends LinearOpMode {
             telemetry.addData("Target Tower Height", towerHeight);
             telemetry.addData("Left Tower Height", robot.leftTower.getCurrentPosition());
             telemetry.addData("Right Tower Height", robot.rightTower.getCurrentPosition());
+            telemetry.addData("Left Tower Power", Math.round(robot.leftTower.getCurrent(CurrentUnit.MILLIAMPS)));
+            telemetry.addData("Right Tower Power", Math.round(robot.rightTower.getCurrent(CurrentUnit.MILLIAMPS)));
+//            telemetry.addData("Left Tower Power", robot.leftTower.getPower());
+//            telemetry.addData("Right Tower Power", robot.rightTower.getPower());
             telemetry.addData("Launcher Height", launchArmAngle);
             // telemetry.addData("Tower Speeds", leftTowerSpeed + ", " + rightTowerSpeed);
             telemetry.update();
