@@ -10,8 +10,8 @@ import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.BlueOpenCVMaster;
 import org.firstinspires.ftc.teamcode.drive.opmode.Ragnarok.CenterStage.HardwareCenterStage;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name="v1.0 Just Spike Auto Blue Audience", preselectTeleOp = "--MAIN-- TeleOp")
-public class AutoBlueAudienceJustSpikev1_0 extends LinearOpMode {
+@Autonomous(name="v1.0 Spike and Park Auto Blue Audience", preselectTeleOp = "--MAIN-- TeleOp")
+public class AutoBlueAudienceSpikeandParkv1_0 extends LinearOpMode {
 
     public static double L = 17.5; // length of bot
     public static double W = 16.2; // width of bot
@@ -33,6 +33,8 @@ public class AutoBlueAudienceJustSpikev1_0 extends LinearOpMode {
         Pose2d spikeDrop2 = new Pose2d(-R*2/3-1, R/3, T/2);
         Pose2d spikeDrop1 = new Pose2d(-(L+2)/4 - R/3,R/3 + 6 + (L+2)/4*SQRT3, T/2-T/6);
         Pose2d notPark = new Pose2d(-R/2, R*5/6, T/4);
+        Pose2d pathNode = new Pose2d(-R/2+1, R*5/6, T/2);
+        Pose2d park = new Pose2d(R*5/6, R*5/6, T/2);
 
         BlueOpenCVMaster cv = new BlueOpenCVMaster(this);
         cv.observeStick();
@@ -57,7 +59,7 @@ public class AutoBlueAudienceJustSpikev1_0 extends LinearOpMode {
                 .turn(T/2 + 1e-6)
                 .turn(-0.02)
                 .addTemporalMarker(()->{
-                                robot.moveIntake(-0.7);
+                    robot.moveIntake(-0.7);
                 })
                 .strafeTo(getVec(notPark))
                 .build();
@@ -66,7 +68,7 @@ public class AutoBlueAudienceJustSpikev1_0 extends LinearOpMode {
                 .strafeTo(getVec(spikeDrop2))
                 .turn(-T/4-T/60)
                 .addTemporalMarker(()->{
-                                robot.moveIntake(-0.7);
+                    robot.moveIntake(-0.7);
                 })
                 .setTangent(T/2)
                 .splineToConstantHeading(getVec(notPark), T/4)
@@ -76,7 +78,7 @@ public class AutoBlueAudienceJustSpikev1_0 extends LinearOpMode {
                 .forward(2)
                 .splineToLinearHeading(spikeDrop1, 0)
                 .addTemporalMarker(()->{
-                                robot.moveIntake(-0.7);
+                    robot.moveIntake(-0.7);
                 })
                 .setTangent(T/2)
                 .splineToLinearHeading(notPark, T/4)
@@ -94,6 +96,10 @@ public class AutoBlueAudienceJustSpikev1_0 extends LinearOpMode {
         }
         sleep(1000);
         robot.moveBucket(0);
+        drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                .splineToLinearHeading(pathNode, 0)
+                .strafeTo(getVec(park))
+                .build());
         sleep(2000);
     }
 

@@ -27,6 +27,7 @@ public class MainTeleOpv1 extends LinearOpMode {
         GRID          // testing
     }
 
+
     public static double MAX_FACTOR = 30.0;
     public static double MIN_FACTOR = 3.0;
     public static int FACTOR_POINT_1 = 10;
@@ -53,6 +54,10 @@ public class MainTeleOpv1 extends LinearOpMode {
 
     boolean launchState = false;
     boolean gp1_y_last_frame = false;
+
+    boolean resetComboLastFrame = false;
+
+    int sebatiansweirdsoweflipcontrolssometimes = 1;
 
     private Mode currentMode = Mode.NORMAL_CONTROL;
     private PIDFController headingController = new PIDFController(SampleMecanumDrive.HEADING_PID);
@@ -123,6 +128,11 @@ public class MainTeleOpv1 extends LinearOpMode {
                 speedChange2 = 0.7;
             }
 
+            if ((gamepad1.dpad_down && gamepad1.a) || resetComboLastFrame) {
+                robot.leftTower.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                robot.rightTower.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                robot.moveTowers(-0.2);
+            } else {
                 towerHeight += TOWER_SPEED_FACTOR * -gamepad2.left_stick_y * speedChange2;
                 towerHeight = (int) bound(5, towerHeight, HardwareCenterStage.MAX_TOWER_HEIGHT * 0.9);
 
@@ -139,20 +149,29 @@ public class MainTeleOpv1 extends LinearOpMode {
                     flipState = false;
                 }
                 if (gamepad2.dpad_left) {
-                    towerHeight = 500;
+                    towerHeight = 350;
                     flipState = true;
                 }
 
                 double verticalSpeedGravityFactor = towerHeight - robot.leftTower.getCurrentPosition() < 0 ? 0.5 : 1;
-                double verticalSpeedDistanceFactor = bound(MIN_FACTOR, f(Math.abs(towerHeight - robot.leftTower.getCurrentPosition())), MAX_FACTOR);
+                double verticalSpeedDistanceFactor = bound(MIN_FACTOR, f(Math.abs(towerHeight - (robot.leftTower.getCurrentPosition() + robot.rightTower.getCurrentPosition())/2)), MAX_FACTOR);
 
                 robot.leftTower.setTargetPosition(towerHeight);
                 robot.rightTower.setTargetPosition(towerHeight);
+                if (!robot.leftTower.getMode().equals(DcMotor.RunMode.RUN_TO_POSITION)) {
+                    robot.leftTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    robot.rightTower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                }
                 robot.moveTowers(speedChange2 * verticalSpeedGravityFactor * verticalSpeedDistanceFactor);
 
 //            robot.leftTower.setPower(-gamepad2.left_stick_y * speedChange2 * 0.67);
 //            robot.rightTower.setPower(-gamepad2.left_stick_y * speedChange2 * 0.67);
-
+            }
+            if (!(gamepad1.dpad_down && gamepad1.a) && resetComboLastFrame) {
+                robot.leftTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                robot.rightTower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            }
+            resetComboLastFrame = gamepad1.dpad_down && gamepad1.a;
 
             robot.moveIntake(gamepad2.x ? (gamepad2.left_bumper ? -0.65 : 1) : 0);
 
@@ -168,7 +187,8 @@ public class MainTeleOpv1 extends LinearOpMode {
 
             robot.moveBucket(gamepad2.a ? (flipState ? -0.5 : 1) : 0);
 
-            robot.liftIntake.setPosition(flipState ? HardwareCenterStage.LIFT_INTAKE_POS_2 : HardwareCenterStage.LIFT_INTAKE_POS_1 + gamepad2.right_trigger * (HardwareCenterStage.LIFT_INTAKE_POS_2 - HardwareCenterStage.LIFT_INTAKE_POS_1));
+            robot.liftIntake.setPosition(flipState ? HardwareCenterStage.LIFT_INTAKE_POS_2 :
+                    HardwareCenterStage.LIFT_INTAKE_POS_1 + gamepad2.right_trigger * (HardwareCenterStage.LIFT_INTAKE_POS_2 - HardwareCenterStage.LIFT_INTAKE_POS_1));
 
             if (gamepad1.b && !gp1_b_last_frame) {
                 triggerState = !triggerState;
@@ -185,9 +205,11 @@ public class MainTeleOpv1 extends LinearOpMode {
 //            launchArmAngle += (gamepad1.right_trigger - gamepad1.left_trigger)*0.01;
 //            launchArmAngle = bound(0, launchArmAngle, 0.5);
 //            robot.launchArm.setPosition(launchArmAngle);
+            if (gamepad1.start && gamepad1.a) { sebatiansweirdsoweflipcontrolssometimes = 1; }
+            if (gamepad1.start && gamepad1.x) { sebatiansweirdsoweflipcontrolssometimes = -1; }
 
-            ly = -gamepad1.left_stick_y;
-            lx = -gamepad1.left_stick_x;
+            ly = -gamepad1.left_stick_y * sebatiansweirdsoweflipcontrolssometimes;
+            lx = -gamepad1.left_stick_x * sebatiansweirdsoweflipcontrolssometimes;
             rx = -gamepad1.right_stick_x;
 
                     //Normal Robot Control
@@ -224,7 +246,7 @@ public class MainTeleOpv1 extends LinearOpMode {
             telemetry.addData("Right Tower Power", Math.round(robot.rightTower.getCurrent(CurrentUnit.MILLIAMPS)));
 //            telemetry.addData("Left Tower Power", robot.leftTower.getPower());
 //            telemetry.addData("Right Tower Power", robot.rightTower.getPower());
-            telemetry.addData("Launcher Height", launchArmAngle);
+            telemetry.addData("Flipped Controls?", sebatiansweirdsoweflipcontrolssometimes == 1 ? "Yes" : "No");
             // telemetry.addData("Tower Speeds", leftTowerSpeed + ", " + rightTowerSpeed);
             telemetry.update();
         }

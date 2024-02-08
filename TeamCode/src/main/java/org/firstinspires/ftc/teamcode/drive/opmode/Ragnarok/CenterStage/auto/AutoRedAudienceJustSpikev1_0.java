@@ -31,10 +31,8 @@ public class AutoRedAudienceJustSpikev1_0 extends LinearOpMode {
 
         Pose2d spikeDrop1 = new Pose2d(-R*2/3,-R/2 - L/2 - 1, -T/4);
         Pose2d spikeDrop2 = new Pose2d(-R*2/3-1, -R/3, -T/2);
-        Pose2d spikeDrop3 = new Pose2d(-(L+2)/4 - R/3,-R/3 - 6 - (W+2)/4*SQRT3, -T/2+T/6);
+        Pose2d spikeDrop3 = new Pose2d(-(L+2)/4 - R/3,-R/3 - 6 - (L+2)/4*SQRT3, -T/2+T/6);
         Pose2d notPark = new Pose2d(-R/2, -R*5/6, -T/4);
-        Pose2d pathNode = new Pose2d(-R/2+1, -R*5/6, T/2);
-        Pose2d park = new Pose2d(R*5/6, -R*5/6, T/2);
 
         RedOpenCVMaster cv = new RedOpenCVMaster(this);
         cv.observeStick();
@@ -96,12 +94,6 @@ public class AutoRedAudienceJustSpikev1_0 extends LinearOpMode {
         }
         sleep(1000);
         robot.moveIntake(0);
-        if (item == 1) {
-            drive.followTrajectorySequence(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                    .splineToLinearHeading(pathNode, 0)
-                    .strafeTo(getVec(park))
-                    .build());
-        }
         sleep(2000);
     }
 
