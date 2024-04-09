@@ -63,10 +63,10 @@ public class AutoRedBackstagev1_0 extends LinearOpMode {
                 .splineToSplineHeading(spikeDrop1Node, T/4)
                 .splineToLinearHeading(spikeDrop1, T/3)
                 .addTemporalMarker(()->{
-                    robot.moveIntake(-0.7);
+                    robot.moveIntake(-0.5);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(0.3, ()->{
-                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.04);
+                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.07);
                 })
                 .setTangent(0)
                 .splineToLinearHeading(board1, 0)
@@ -80,10 +80,10 @@ public class AutoRedBackstagev1_0 extends LinearOpMode {
                 .setTangent(T/4)
                 .splineToLinearHeading(spikeDrop2, T/4)
                 .addTemporalMarker(()->{
-                    robot.moveIntake(-0.7);
+                    robot.moveIntake(-0.5);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(0.3, ()->{
-                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.04);
+                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.07);
                 })
                 .setTangent(0)
                 .splineToConstantHeading(getVec(board2), 0)
@@ -96,10 +96,10 @@ public class AutoRedBackstagev1_0 extends LinearOpMode {
         TrajectorySequence place3 = drive.trajectorySequenceBuilder(START_POSITION)
                 .splineToLinearHeading(spikeDrop3, T/6)
                 .addTemporalMarker(()->{
-                    robot.moveIntake(-0.7);
+                    robot.moveIntake(-0.5);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(0.3, ()->{
-                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.04);
+                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.07);
                 })
                 .setTangent(-T/6)
                 .splineToLinearHeading(board3, 0)

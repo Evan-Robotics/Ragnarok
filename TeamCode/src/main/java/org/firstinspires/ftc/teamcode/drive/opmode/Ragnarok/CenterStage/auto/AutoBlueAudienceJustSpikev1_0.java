@@ -29,9 +29,9 @@ public class AutoBlueAudienceJustSpikev1_0 extends LinearOpMode {
         HardwareCenterStage robot = new HardwareCenterStage();
         robot.init(hardwareMap);
 
-        Pose2d spikeDrop3 = new Pose2d(-R*2/3,R/2 + L/2 + 1, T/4);
-        Pose2d spikeDrop2 = new Pose2d(-R*2/3-1, R/3, T/2);
-        Pose2d spikeDrop1 = new Pose2d(-(L+2)/4 - R/3,R/3 + 6 + (L+2)/4*SQRT3, T/2-T/6);
+        Pose2d spikeDrop3 = new Pose2d(-R*2/3+1,R/2 + L/2 + 1, T/4);
+        Pose2d spikeDrop2 = new Pose2d(-R*2/3+2, R/3, T/2);
+        Pose2d spikeDrop1 = new Pose2d(-(L+4)/4 - R/3,R/3 + 6 + (L+4)/4*SQRT3, T/2-T/6);
         Pose2d notPark = new Pose2d(-R/2, R*5/6, T/4);
 
         BlueOpenCVMaster cv = new BlueOpenCVMaster(this);
@@ -68,7 +68,7 @@ public class AutoBlueAudienceJustSpikev1_0 extends LinearOpMode {
                 .addTemporalMarker(()->{
                                 robot.moveIntake(-0.7);
                 })
-                .setTangent(T/2)
+                .setTangent(-2*T/3)
                 .splineToConstantHeading(getVec(notPark), T/4)
                 .build();
 

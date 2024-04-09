@@ -30,14 +30,14 @@ public class AutoBlueBackstagev1_0 extends LinearOpMode {
         HardwareCenterStage robot = new HardwareCenterStage();
         robot.init(hardwareMap);
 
-        Pose2d spikeDrop1 = new Pose2d((L+3)/4 + R/3, R/3 + 2 - (L+3)/4*SQRT3, -T/6);
+        Pose2d spikeDrop1 = new Pose2d((L+2)/4 + R/3, R/3 + 2 - (L+2)/4*SQRT3, -T/6);
         Pose2d spikeDrop2 = new Pose2d(R/3, R/3-0.2, 0);
         Pose2d spikeDrop3Node = new Pose2d(R*2/9,R*7/9, T/6);
         Pose2d spikeDrop3 = new Pose2d((L+3)/4,R/3 + 12 + (L+3)/4*SQRT3, T/6);
-        Pose2d board1 = new Pose2d(R/3*2, R/2, 0);
+        Pose2d board1 = new Pose2d(R/3*2+5, R/2+5, 0);
         Pose2d board2 = new Pose2d(R/3*2+7, R/2, 0);
         Pose2d board3 = new Pose2d(R/3*2+8, R/2-6, 0);
-        Pose2d park = new Pose2d(R*2/3, R*2/3+3, 0);
+        Pose2d park = new Pose2d(R*2/3-2, R*2/3+3, 0);
 
         BlueOpenCVMaster cv = new BlueOpenCVMaster(this);
         cv.observeStick();
@@ -60,11 +60,11 @@ public class AutoBlueBackstagev1_0 extends LinearOpMode {
         TrajectorySequence place1 = drive.trajectorySequenceBuilder(START_POSITION)
                 .splineToLinearHeading(spikeDrop1, -T/6)
                 .addTemporalMarker(()->{
-                    robot.moveIntake(-0.7);
-                    robot.counterRoller.setPower(-0.7);
+                    robot.moveIntake(-0.6);
+//                    robot.counterRoller.setPower(-0.8);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(0.3, ()->{
-                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.09);
+                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.07);
                 })
                 .setTangent(T/4)
                 .splineToLinearHeading(board1, -T/12)
@@ -72,7 +72,7 @@ public class AutoBlueBackstagev1_0 extends LinearOpMode {
                 .addTemporalMarker(()->{
                     robot.moveIntake(0);
                     robot.counterRoller.setPower(0);
-                    robot.moveBucket(-0.5);
+                    robot.moveBucket(-0.3);
                 })
                 .build();
 
@@ -80,7 +80,8 @@ public class AutoBlueBackstagev1_0 extends LinearOpMode {
                 .setTangent(-T/4)
                 .splineToLinearHeading(spikeDrop2, 0)
                 .addTemporalMarker(()->{
-                    robot.moveIntake(-0.7);
+                    robot.moveIntake(-0.6);
+//                    robot.counterRoller.setPower(-0.8);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(0.3, ()->{
                     robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.07);
@@ -89,7 +90,8 @@ public class AutoBlueBackstagev1_0 extends LinearOpMode {
                 .splineToConstantHeading(getVec(board2), 0)
                 .addTemporalMarker(()->{
                     robot.moveIntake(0);
-                    robot.moveBucket(-0.5);
+                    robot.counterRoller.setPower(0);
+                    robot.moveBucket(-0.3);
                 })
                 .build();
 
@@ -98,16 +100,18 @@ public class AutoBlueBackstagev1_0 extends LinearOpMode {
                 .splineToSplineHeading(spikeDrop3Node, -T/4)
                 .splineToLinearHeading(spikeDrop3, -T/3)
                 .addTemporalMarker(()->{
-                    robot.moveIntake(-0.7);
+                    robot.moveIntake(-0.6);
+//                    robot.counterRoller.setPower(-0.8);
                 })
                 .UNSTABLE_addTemporalMarkerOffset(0.3, ()->{
-                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.09);
+                    robot.setArmPosition(HardwareCenterStage.ARM_POS_2+0.08);
                 })
                 .setTangent(0)
                 .splineToLinearHeading(board3, 0)
                 .addTemporalMarker(()->{
                     robot.moveIntake(0);
-                    robot.moveBucket(-0.5);
+                    robot.counterRoller.setPower(0);
+                    robot.moveBucket(-0.2);
                 })
                 .build();
 

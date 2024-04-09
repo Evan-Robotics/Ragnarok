@@ -54,7 +54,7 @@ public class HardwareCenterStage {
     public CRServo bucket = null;
     public Servo launchArm = null;
     public static double LAUNCH_ARM_POS_1 = 0;
-    public static double LAUNCH_ARM_POS_2 = 0.7;
+    public static double LAUNCH_ARM_POS_2 = 0.95;
     public CRServo counterRoller = null;
     public Servo trigger = null;
     public static double TRIGGER_POS_1 = 0;

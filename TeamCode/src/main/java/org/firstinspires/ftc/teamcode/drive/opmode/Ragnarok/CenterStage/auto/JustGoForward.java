@@ -32,6 +32,7 @@ public class JustGoForward extends LinearOpMode {
         if (isStopRequested()) return;
         sleep(100);
 
+
         Trajectory place1 = drive.trajectoryBuilder(START_POSITION)
                 .forward(70/3*2-BOT_LENGTH)
                 .build();
